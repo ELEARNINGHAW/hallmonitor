@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <title>Tippy</title>
+  </head>
+  <body>
+    <button id="myButton1">My button</button>
+    <button id="myButton2">My button</button>
+    <button id="myButton3">My button</button>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+      tippy('#myButton1', {
+	    allowHTML: true,
+        content: '<div style="font-size:60px;">My tooltip!1</div>',
+      });
+
+      tippy('#myButton2', {
+	    allowHTML: true,
+        content: '<div style="font-size:60px;">My tooltip!2</div>',
+      });
+
+      tippy('#myButton3', {
+	    allowHTML: true,
+        content: '<div style="font-size:60px;">My tooltip!3</div>',
+      });
+
+
+
+    </script>
+  </body>
+</html>
+</html>

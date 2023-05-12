@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.overlay  {
+  position: fixed;
+  display: none;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 2;
+  cursor: pointer;
+}
+
+#overlaytext{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 50px;
+  color: white;
+  transform: translate(-50%,-50%);
+  -ms-transform: translate(-50%,-50%);
+}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay1" onclick="overlay_off(1)">
+  <div id="overlaytext">Overlay Text 1</div>
+</div>
+
+<div class="overlay"  id="overlay2" onclick="overlay_off(2)">
+  <div id="overlaytext">Overlay Text 2</div>
+</div>
+
+<div class="overlay" id="overlay3" onclick="overlay_off(3)">
+  <div id="overlaytext">Overlay Text 3</div>
+</div>
+
+
+<div style="padding:20px">
+  <h2>Overlay with Text</h2>
+  <button onclick="overlay_on(1)">Turn on overlay effect 1</button>
+  <button onclick="overlay_on(2)">Turn on overlay effect 2</button>
+  <button onclick="overlay_on(3)">Turn on overlay effect 3</button>
+</div>
+
+<script>
+function overlay_on(id)  { document.getElementById("overlay"+id).style.display = "block";}
+function overlay_off(id) { document.getElementById("overlay"+id).style.display = "none"; }
+</script>
+   
+</body>
+</html> 

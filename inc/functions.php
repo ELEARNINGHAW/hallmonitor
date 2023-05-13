@@ -1,13 +1,18 @@
 <?php
 
-function getNewsticker( $db, $today )
+function getNewsticker( $db, $raw, $today = '')
 { $newsticker = null;
   $res = $db->query('SELECT * FROM newsticker');
   while ($row = $res -> fetchArray( ) )
   { $newsticker[ $row[ 'id' ] ] = $row;
   }
   
-  $html['newsticker'] = <<<EOD
+  if($raw)
+  {  return $newsticker;
+  }
+
+  else
+  {  $html['newsticker'] = <<<EOD
 <div class="news red">
 <span>News</span>
 <ul>
@@ -25,6 +30,7 @@ EOD;
 EOD;
   
   return $html['newsticker'];
+  }
 }
 
 function getScreen( $db )
@@ -58,5 +64,15 @@ function getHtml($db , $html)
   }
   return $html;
 }
+
+
+function deb($val, $kill= false)
+{
+  echo "<pre>";
+  print_r($val);
+  echo "</pre>";
+  if ($kill) die();
+}
+
 
 ?>

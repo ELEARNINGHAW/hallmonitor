@@ -1,5 +1,4 @@
 <?php
-
 include ('inc/functions.php') ;
 include ('data.php') ;
 $cNr = 0;
@@ -11,7 +10,7 @@ $today =  strtotime ( date("Y-m-d" ) );
 $screen = getScreen( $db );
 
 $html =  getHtml( $db, $html );
-$html[ 'newsticker'  ] = getNewsticker( $db, $today );
+$html[ 'newsticker'  ] = getNewsticker( $db, false, $today );
 $html[ 'screenslide' ] = getScreenslide( $screen, $today, $html[ 'screenslide' ] );
 
 if( !$cNr )

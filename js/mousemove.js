@@ -1,4 +1,4 @@
-var timeout = 10;
+var timeout = 60;
 var old_x = 0;  var x = 0;
 var old_y = 0;  var y = 0;
 
@@ -32,7 +32,7 @@ function stopTimeOutTimer()
 
 function getMousePosi()
 { if( old_x == x )
-  {  //location.href = 'index.php';
+  {  location.href = 'index.php';
   }
   old_x = x;
 }

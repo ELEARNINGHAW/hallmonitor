@@ -1,4 +1,4 @@
-var timeout = 60;
+var timeout = 100;
 var old_x = 0;  var x = 0;
 var old_y = 0;  var y = 0;
 

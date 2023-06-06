@@ -6,11 +6,12 @@ if( isset( $_GET[ 'cNr' ] ) ) $cNr = $_GET[ 'cNr' ];
 
 $db     =  new SQLite3('db/hallmonitor.db' );
 $today  =  strtotime ( date("Y-m-d" ) );
-$screen =  getScreen( $db );
+$screen =  getScreenData( $db );
+$html = '';
 
-$html =  getHtml( $db, $html );
-$html[ 'newsticker'  ] = getNewsticker( $db, false, $today );
-$html[ 'screenslide' ] = getScreenslide( $screen, $today, $html[ 'screenslide' ] );
+$html =  getHtmlData( $db, $html );
+$html[ 'newsticker'  ] = getNewstickerData( $db, false, $today );
+$html[ 'screenslide' ] = getScreenslideData( $html, $screen, $today, $html[ 'screenslide' ] );
 
 if( !$cNr )
 { echo $html[ 'navihead'    ];

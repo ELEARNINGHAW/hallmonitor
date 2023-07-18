@@ -1,7 +1,0 @@
-hallmonitor
-pwhm01
-
-
-sudo apt install php7.4-sqlite3
-google-chrome -kiosk http://192.168.198.130/index.php --overscroll-history-navigation=0 
-chromium -kiosk http://192.168.198.130/index.php --overscroll-history-navigation=0

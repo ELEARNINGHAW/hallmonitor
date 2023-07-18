@@ -1,17 +1,17 @@
 <?php
-#print_r($_POST);
+session_start();
+if( $_SESSION[ 'user_email' ] == "" )   { header( 'location:login/index.php' ); }
 ?>
 
-<div id="result"></div>
 <?php
 
 include( 'inc/functions.php' );
 
-$db = new SQLite3('db/hallmonitor.db' );
+$db = new SQLite3('../db/hallmonitor.db' );
 
 if ( isset ( $_POST ) ) { actionHandler( $db ); }
 
-$htmlData   = getHtmlData( $db );
+$htmlData = getHtmlData( $db );
 
 echo( $htmlData[ 'editorhead' ] );
 

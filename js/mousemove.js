@@ -1,6 +1,7 @@
-var timeout = 100;
-var old_x = 0;  var x = 0;
-var old_y = 0;  var y = 0;
+var timeout = 120;
+var old_x = 0;
+var old_y = 0;
+var currentMousePos = { x: -1, y: -1 };
 
 function setTimeOutTimer()
 {
@@ -8,31 +9,30 @@ function setTimeOutTimer()
 }
 
 function startTimeOutTimer()
-{  
-  document.addEventListener('DOMContentLoaded', function () 
+{
+  jQuery(function($)
   {
-  document.getElementById('buehne').addEventListener('mousemove', holeKoordinaten);
-  
-  function holeKoordinaten(e)  
-  {
-  x = e.clientX;
-  y = e.clientY;
-  document.getElementById('x').innerHTML = x;
-  document.getElementById('y').innerHTML = y;
-  }
-});	
-	
-  setInterval(getMousePosi, timeout*1000);
-}
+     $(document).mousemove(function(event)
+     { currentMousePos.x = event.pageX;
+       currentMousePos.y = event.pageY;
+     });
 
-function stopTimeOutTimer()
-{  
-  clearInterval(getMousePosi);
+     // ELSEWHERE, your code that needs to know the mouse position without an event
+      console.log(old_x);
+      console.log(currentMousePos.x);
+      setInterval(getMousePosi, timeout*500);
+
+  });
+
+
 }
 
 function getMousePosi()
-{ if( old_x == x )
+{
+    console.log(old_x);
+    console.log(currentMousePos.x);
+    if( old_x == currentMousePos.x )
   {  location.href = 'index.php';
   }
-  old_x = x;
+  old_x = currentMousePos.x;
 }

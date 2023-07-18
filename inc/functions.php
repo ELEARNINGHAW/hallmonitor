@@ -2,22 +2,24 @@
 
 function getNewstickerData( $db, $raw, $today = '')
 { $newsticker = null;
-  $res = $db->query( 'SELECT * FROM newsticker' );
+  
+  $stmt = $db->prepare( 'SELECT * FROM newsticker' );
+  $res = $stmt->execute();
+
   while ( $row = $res -> fetchArray( ) )
   { $newsticker[ $row[ 'id' ] ] = $row;
   }
   
-  if($raw)
+  if( $raw )
   {  return $newsticker;
   }
   else
-  {  $html['newsticker']['html'] = <<<EOD
-<div class="news red">
-<span>News</span>
-<ul>
+  {  $html[ 'newsticker' ][ 'html' ] = <<<EOD
+<div class="news red"><span>News</span><ul>
 EOD;
 
-  $html['newsticker']['payload']= false;
+  $html[ 'newsticker' ][ 'payload' ]= false;
+  if(isset($newsticker))
   foreach ($newsticker as $nt)
   { if($nt['active'] AND $today < strtotime( $nt['best_before'])  )
   {  $html['newsticker']['html'] .= '<li><a href="#">+++ ' . $nt['text'] . ' +++ </a></li>';
@@ -28,67 +30,67 @@ EOD;
 </ul>
 </div>
 EOD;
+
   return $html['newsticker'];
   }
 }
 
 function getScreenData( $db )
 { $screen = null;
-  $res = $db -> query( 'SELECT * FROM slidescreen' );
+  $stmt = $db->prepare( 'SELECT * FROM slidescreen' );
+  $res = $stmt->execute();
+  
   while ( $row = $res -> fetchArray() )
   {  $screen[ $row[ 'id' ] ]  = $row;
   }
+
   return $screen;
 }
 
-function getScreenslideData( $html, $screen, $today, $screenslide )
-{ $html[ 'screenslide' ] =  $screenslide;
-  foreach ($screen as $sc)
-  {     #deb( $today <=  strtotime( $sc['best_before']) );
-    if ( $sc[ 'active' ] == 'true' AND $today <= strtotime( $sc['best_before']) )
-  { if ( $sc[ 'content' ] AND $sc[ 'content' ] != '<p><br data-mce-bogus="1"></p>' ) { $sc[ 'header' ] = '<a href="index.php?cNr=' .$sc['id'] . '">' .$sc['header']. '</a>' ; }
-    $html[ 'screenslide' ] .= '<div data-img="i/' . $sc['img'] . '-lo.jpg" class="any inverse"><div class="mo">' . $sc['header'] . '</div></div>'."\n";
-  }
-  }
-  $html['screenslide'] .= '</div>';
-  #deb( $html['screenslide'],1);
-  return $html['screenslide'] ;
-}
-
-
 function getHtmlData( $db )
 { $html = getHTML2();
-  $res = $db -> query('SELECT * FROM html' );
+  $stmt = $db->prepare( 'SELECT * FROM html' );
+  $res = $stmt->execute();
+
   while ( $row = $res -> fetchArray( ) )
   { $html[ $row[ 'name' ] ] = $row[ 'value' ];
   }
+
   return $html;
 }
 
 
 function actionHandler( $db )
-{
-  $post = $_POST;
+{ $post = $_POST;
   if( isset( $post['action'] ) )
   { if ( $post['action'] == ' NEW ')
     $ss ['best_before'] =  $datepreset =  date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d") + 7 , date("Y")));
- #deb($datepreset,1);
     $ss ['img'] = rand(1, 30);
     
-    { $SQL    = 'INSERT INTO slidescreen (header, content, best_before, img , active ) VALUES ("" , "" , \''. $ss ['best_before']. '\' , ' .$ss ['img']. ', "true" )';
-      $db -> query( $SQL );
+    {
+      $stmt = $db->prepare( 'INSERT INTO slidescreen (header, content, best_before, img , active )  VALUES ("" , "" , ? ,  ? , "true" )' );
+      $stmt->bindValue( 1 , $ss ['best_before'] , SQLITE3_TEXT );
+      $stmt->bindValue( 2 , $ss ['img']         , SQLITE3_TEXT );
+      $res = $stmt->execute();
     }
   }
   
   if( isset( $_POST['ntdel']) )
   { $id   =  $_POST['ntid'];
-    $SQL  = 'DELETE FROM newsticker WHERE id = '.$id ;
-    $db -> query( $SQL );
+    $stmt = $db->prepare( 'DELETE FROM newsticker WHERE id = ?' );
+    $stmt->bindValue( 1 , $id , SQLITE3_INTEGER );
+    $res = $stmt->execute();
   }
   
   if( isset($_POST['nttext0'] ) AND  trim( $_POST['nttext0']) != '' )
   { $nttext = $_POST['nttext0'];
     $ntdate = $_POST['ntdate0'];
+  
+    $stmt = $db->prepare( 'INSERT INTO newsticker (text, best_before, active ) VALUES ( ? , ? , "1" )' );
+    $stmt->bindValue( 1 , $nttext , SQLITE3_TEXT );
+    $stmt->bindValue( 2 , $ntdate , SQLITE3_TEXT );
+    $res = $stmt->execute();
+   
     $SQL    = 'INSERT INTO newsticker (text, best_before, active ) VALUES ("'.$nttext.'","'.$ntdate.'","1" )';
     $db -> query( $SQL );
   }
@@ -96,24 +98,50 @@ function actionHandler( $db )
   if( isset( $_POST['ntid']) )
   { $nt   = $_POST;
     $ntNr = $nt['ntid'];
-    $SQL  = 'UPDATE newsticker SET ';
+   # $SQL  = 'UPDATE newsticker SET ';
     
-    if ( isset ( $nt[ 'nttext'   .$ntNr ] ) ) { $SQL1 = $SQL . ' text         = "'. $nt[ 'nttext'.$ntNr    ]  .'" WHERE id = "'.$ntNr.'" '; $db -> query( $SQL1 );  }
-    if ( isset ( $nt[ 'ntdate'   .$ntNr ] ) ) { $SQL2 = $SQL . ' best_before  = "'. $nt[ 'ntdate'.$ntNr    ]  .'" WHERE id = "'.$ntNr.'" '; $db -> query( $SQL2 );  }
-    if ( isset ( $nt[ 'ntactive' .$ntNr ] ) ) { $SQL3 = $SQL . ' active       = "'. 1  .'" WHERE id = "'.$ntNr.'" '; $db -> query( $SQL3 );  }
-    else                                      { $SQL3 = $SQL . ' active       = "'. 0  .'" WHERE id = "'.$ntNr.'" '; $db -> query( $SQL3 );  }
+    if ( isset ( $nt[ 'nttext'   .$ntNr ] ) )
+    {
+      $stmt = $db->prepare( 'UPDATE newsticker SET text = ? WHERE id = ?' );
+      $stmt->bindValue( 1 , $nt[ 'nttext'.$ntNr  ] , SQLITE3_TEXT );
+      $stmt->bindValue( 2 , $ntNr                  , SQLITE3_TEXT );
+      $res = $stmt->execute();
+    }
+    if ( isset ( $nt[ 'ntdate'   .$ntNr ] ) )
+    { $stmt = $db->prepare( 'UPDATE newsticker SET best_before = ? WHERE id = ?' );
+      $stmt->bindValue( 1 , $nt[ 'ntdate'.$ntNr  ] , SQLITE3_TEXT );
+      $stmt->bindValue( 2 , $ntNr                  , SQLITE3_TEXT );
+      $res = $stmt->execute();
+    }
+    if ( isset ( $nt[ 'ntactive' .$ntNr ] ) )
+    { $stmt = $db->prepare( 'UPDATE newsticker SET active = 1 WHERE id = ?' );
+      $stmt->bindValue( 1 , $ntNr                  , SQLITE3_TEXT );
+      $res = $stmt->execute();
+    }
+    else
+    { $stmt = $db->prepare( 'UPDATE newsticker SET active = 0 WHERE id = ?' );
+      $stmt->bindValue( 1 , $ntNr                  , SQLITE3_TEXT );
+      $res = $stmt->execute();
+    }
   
-    if ( isset ( $nt[ 'ntdel'  ] ) ) { $SQL1 =  'DELETE FROM newsticker WHERE id = "'.$ntNr.'" '; $db -> query( $SQL1 );  }
+    if ( isset ( $nt[ 'ntdel'  ] ) )
+    { $stmt = $db->prepare( 'DELETE FROM newsticker WHERE id = ?' );
+      $stmt->bindValue( 1 , $ntNr                  , SQLITE3_TEXT );
+      $res = $stmt->execute();
+    }
   }
 }
 
 function getNewstickerEditor($db)
-{ $html = '';
+{ $html = '<div class="ntline">';
   $newsticker  = getNewstickerData( $db, true );
+  if(isset ($newsticker))
   foreach ( $newsticker as $nt )
-  {
+  { if( $nt[ 'active' ]  == 1 ) { $chk = 'checked'; $bgc = '#FFFFFF'; } else { $chk = ''; $bgc = '#BEBEBE'; }
+    
+    
     $chk = ''; if($nt['active']) {$chk = 'checked'; }
-    $html .= '<div class="ntline" id="netline'   .$nt[ 'id' ]. '" >'."\n";
+    $html .= '<div class="ntline" id="netline'   .$nt[ 'id' ]. '" style="background-color: '.$bgc.';"  >'."\n";
     $html .=  '<form action="editor.php" method="post" id = "ntform' .$nt[ 'id' ]. '">';
     $html .=  '<span> <input type="text"      class="nttext"   name="nttext'   .$nt[ 'id' ]. '" id="nttext'   .$nt[ 'id' ]. '" value="'.       $nt[ 'text'        ].'" ></span>'."\n";
     $html .=  '<span> <input type="date"      class="ntdate"   name="ntdate'   .$nt[ 'id' ]. '" id="ntdate'   .$nt[ 'id' ]. '" value="'.       $nt[ 'best_before' ].'" ></span> '."\n";
@@ -133,23 +161,22 @@ function getNewstickerEditor($db)
     $html .=  "\n".' if (date >= TodayDate) { bgc = "#FFFFFF";  } else { bgc = "#FF0000";  };';
     $html .=  "\n".' $( "#ntdate' .$nt[ 'id' ]. '").css("background-color", bgc ) ;'  ;
   
-  
-  
-  
     $html .=  '</script>';
   }
   $nt[ 'id' ] = 0;
 
   $datepreset =  date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d") + 7 , date("Y")));
   
-  $html .= '<div class="ntline" id="netline'   .$nt[ 'id' ]. '" >'."\n";
+  $html .=  '<div class="ntline" id="netline'   .$nt[ 'id' ]. '" >'."\n";
   $html .=  '<form action="editor.php" method="post">';
   $html .=  '<span> <input type="text"      class="nttext"   name="nttext'   .$nt[ 'id' ]. '" id="nttext'   .$nt[ 'id' ]. '" value=" " ></span>'."\n";
   $html .=  '<span> <input type="date"      class="ntdate"   name="ntdate'   .$nt[ 'id' ]. '" id="ntdate'   .$nt[ 'id' ]. '" value="'. $datepreset.'" ></span> '."\n";
   $html .=  '<span> <input type="hidden"    class="ntupd"    name="ntupd'                . '" id="ntupd'    .$nt[ 'id' ]. '" value=" " ></span>'."\n";
   $html .=  '<span> <input type="submit"    class="ntsub"    name="ntsub'    .$nt[ 'id' ]. '" id="ntsub'    .$nt[ 'id' ]. '" value=" NEU " ></span>'."\n";
-  $html .=  '</form> <br>'."\n";
+  $html .=  '</form>'."\n";
   $html .=  '</div>'."\n";
+  $html .=  '</div>'."\n";
+  
   return $html;
 }
 
@@ -160,10 +187,232 @@ function deb($val, $kill= false)
   if ($kill) die();
 }
 
+function getScreenSlideEditor($db)
+{
+  $screenData = getScreenData( $db );
+  $html = '<div id="result"></div>';
+  if (isset($screenData))
+  foreach ( $screenData as $ss )
+  { $html.= getScreenSlideRow($ss);
+  }
+  
+  $html .=  "\n" . '<form action="editor.php" method="POST"> ';
+  $html .=  "\n" . ' <div style ="float: right; margin-right: 50px;"> ';
+  $html .= '<input type="submit" class="ssnew" name="action" id="ssnew" value=" NEW ">';
+  $html .=  '</div>';
+  
+  $html .=  "\n" . ' <div style ="float: left; margin-right: 50px;"> ';
+  $html .=  '<button class="ssnew" ><a href="login/logout.php">Logout</a></button>';
+  $html .=  '<button class="ssnew" ><a href="upload-xls.php">EXCEL Upload</a></button>';
+  $html .=  '</div>';
+  $html .=  '</form>';
+
+  $html .=  '<script>';
+  $html .=  "function dateHandler(e){ ;}";
+  $html .=  '</script>';
+  
+  return $html;
+}
+
+
+function getScreenslideData( $html, $screen, $today, $screenslide )
+{ $html[ 'screenslide' ] =  $screenslide;
+  if (isset($html[ 'screenslide' ]))
+    foreach ($screen as $sc)
+    { if ( $sc[ 'active' ] == 'true' AND $today <= strtotime( $sc['best_before']) )
+      { if ( $sc[ 'content' ] AND $sc[ 'content' ] != '<p><br data-mce-bogus="1"></p>'
+        AND $sc[ 'content' ] != '<p><br></p>' )
+      { $sc[ 'header' ] = '<a href="index.php?cNr=' .$sc['id'] . '">' .$sc['header']. '<p  style="position:absolute;top: 900px; width:100%; text-align:center;  font-size: xx-large ;">[weitere Infos >>]</p></a>' ;
+      }
+        $html[ 'screenslide' ] .= '<div data-img="i/jpg/lo/' . $sc['img'] . '-lo.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
+      }
+    }
+  $html['screenslide'] .= '</div>';
+  return $html['screenslide'] ;
+}
+
+
+
+
+function getScreenSlideRow($ss)
+{
+# deb($ss);
+#$ss ['id']
+#$ss['header']
+#$ss['content']
+#$ss ['best_before']
+#$ss ['img']
+#$ss['active']
+if( $ss[ 'active'] == "true" ) { $chk = 'checked'; $bgc = '#FFFFFF'; } else { $chk = ''; $bgc = '#BEBEBE'; }
+ 
+$html  =  "\n" . '<div                           class = "ssline" id="sslineX' .$ss[ 'id' ]. '" style="background-color:' .$bgc. '"  > ';
+$html .=  "\n" . '<div                           class = "ssline2" > <div   name ="ssheader_'  .$ss[ 'id' ]. '"  id = "ssheader__'  .$ss[ 'id' ]. '" class = "ssheader_" >'        .$ss[ 'header'  ]. '</div></div> ';
+$html .=  "\n" . '<div                           class = "ssline2" > <input name ="ssspinner'  .$ss[ 'id' ]. '"  id = "ssspinner_'  .$ss[ 'id' ]. '" class = "ssspinner" value="'  .$ss[ 'img'     ]. '"></div>          ';
+$html .=  "\n" . '<div                           class = "ssline2" > <div   name ="sscontent'  .$ss[ 'id' ]. '"  id = "sscontent_'  .$ss[ 'id' ]. '" class = "sscontent" >'        .$ss[ 'content' ]. '</div></div><div> ';
+
+$html .=  "\n" . '<div                      class = "ssline2"   id = "ssblockC'    .$ss[ 'id' ]. '">';
+$html .=  "\n" . ' <input type = "date"     class = "ssdate"    name ="ssdate"   id = "ssdate'    .$ss[ 'id' ]. '" value="'         .$ss[ 'best_before' ]. '" ><br>';
+$html .=  "\n" . ' <input type = "checkbox" class = "ssactive"  name ="ssactive" id = "ssactive'  .$ss[ 'id' ]. '" value="active" ' .$chk. ' ><br>';
+
+$html .=  "\n" . '<div id="drag-and-drop-zone' .$ss[ 'id' ]. '" class="dm-uploader">';
+$html .=  "\n" . '<h3 class="mb-5 mt-5 text-muted">PDF</h3> ';
+$html .=  "\n" . '<div class="btn btn-primary btn-block mb-5"> ';
+$html .=  "\n" . '<span>open</span> ';
+$html .=  "\n" . '<input type="file"  title="Click to add Files" /> ';
+$html .=  "\n" . '<input type="hidden" id="x38" name="ssid" value="'.$ss[ 'id' ].'" /> ';
+$html .=  "\n" . '</div></div> ';
+$html .=  "\n" . ' ';
+
+$html .=  "\n" . '<input type = "button"    class = "ssdel"     name ="action"   id = "ssdel'     .$ss[ 'id' ]. '" value=" DEL " >';
+$html .=  "\n" . '</div>';
+$html .=  "\n" . '</div>';
+$html .=  "\n" . '</div>';
+
+$html .=  "\n".'<script>';
+$html .=  "\n".' $( "#ssspinner_'  .$ss[ 'id' ]. '" ).spinner(';
+$html .=  "\n".' { ';
+$html .=  "\n".' min:0, ';
+$html .=  "\n".' max:30, ';
+$html .=  "\n".' icons: { down: "custom-down-icon", up: "custom-up-icon" }, ';
+$html .=  "\n".' change: function( event, uic' .$ss[ 'id' ]. ' )';
+$html .=  "\n".' {  $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSPICH", ' .$ss[ 'id' ]. ',  $("#ssspinner_' .$ss[ 'id' ]. '" ).spinner( "value" ) ] } );   } ';
+$html .=  "\n".', spin: function( event, uis' .$ss[ 'id' ]. ' ) ';
+$html .=  "\n".' {  myurl = \'url( "i/jpg/lo/\'+uis' .$ss[ 'id' ]. '.value+\'-lo.jpg" )\'; '."\n".' $( "#ssheader__'  .$ss[ 'id' ]. '" ).css( "background-image" , myurl );} ';
+$html .=  "\n".' }); ';
+$html .=  "\n".' $( "#ssspinner_' .$ss[ 'id' ]. '" ).spinner( "value", '.$ss[ 'img' ].' );';
+
+$html .=  "\n".'tinymce.init(';
+$html .=  "\n".'{selector: "#ssheader__'  .$ss[ 'id' ]. '",';
+$html .=  "\n".'menubar: false,';
+$html .=  "\n".'inline: true,';
+$html .=  "\n".' paste_as_text: true,';
+$html .=  "\n"." plugins: [";
+$html .=  "\n"."'advlist autolink lists link image charmap print preview anchor',";
+$html .=  "\n"." 'searchreplace visualblocks code fullscreen',";
+$html .=  "\n"." 'insertdatetime media table paste wordcount'";
+$html .=  "\n"."],";
+$html .=  "\n".'toolbar: "undo redo | bold italic underline",';
+$html .=  "\n".'content_css: "css/minicontent.css", ';
+$html .=  "\n".'setup: (editor) => ';
+$html .=  "\n".'{ editor.on("focusOut", () => ';
+$html .=  "\n".'{ console.log(  $("#ssheader__' .$ss[ 'id' ]. '" ).html()  );  ';
+$html .=  "\n".' $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSHEAD", ' .$ss[ 'id' ]. ',  $("#ssheader__' .$ss[ 'id' ]. '" ).html()] } );';
+$html .=  "\n".'';
+$html .=  "\n".' });';
+$html .=  '}';
+$html .=  '}); ';
+
+
+$html .=  "\n".' tinymce.init({';
+$html .=  "\n".' selector: "#sscontent_'  .$ss[ 'id' ]. '",';
+$html .=  "\n".' menubar: false,';
+$html .=  "\n".' inline: true,';
+$html .=  "\n".' paste_as_text: true,';
+$html .=  "\n".' toolbar: "undo redo | bold italic underline | code",';
+$html .=  "\n".' content_css: "css/minicontent.css", ';
+
+$html .=  "\n"." plugins: [";
+$html .=  "\n"."'advlist autolink lists link image charmap print preview anchor',";
+$html .=  "\n"." 'searchreplace visualblocks code fullscreen',";
+$html .=  "\n"." 'insertdatetime media table paste wordcount'";
+$html .=  "\n"."],";
+$html .=  "\n"."toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat code ',";
+#  $html .=  "\n"."  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'";
+$html .=  "\n"."";
+$html .=  "\n"."";
+$html .=  "\n"."";
+
+$html .=  "\n".' setup: (editor) => ';
+$html .=  "\n".' { editor.on("focusOut", () => ';
+$html .=  "\n".' { console.log(  $("#sscontent_' .$ss[ 'id' ]. '" ).html()  );  ';
+$html .=  "\n".' $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSCONT", ' .$ss[ 'id' ]. ',  $("#sscontent_' .$ss[ 'id' ]. '" ).html()] } );';
+$html .=  "\n".' });}}); ';
+$html .=  "\n".'';
+$html .=  '';
+$html .=  '';
+$html .=  ' function success(){ ;} ';
+$html .=  '';
+$html .=  '';
+
+$html .=  "\n".'$( "#ssheader__' .$ss[ 'id' ]. '" ).css( "background-image" , "url( \'i/jpg/lo/'  .$ss[ 'img' ]. '-lo.jpg\' )" );';
+
+$html .=  "$( '#ssactive" .$ss[ 'id' ]. "' ).change( function()";
+$html .=  '{';
+$html .=  "\n".' $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSACTIV", ' .$ss[ 'id' ]. ',  $("#ssactive' .$ss[ 'id' ]. '" ).prop("checked") ] });';
+$html .=  "\n".' if ($("#ssactive' .$ss[ 'id' ]. '" ).is(":checked")) { bgc = "#FFFFFF";  } else { bgc = "#BEBEBE";  };'  ;
+$html .=  "\n".' $( "#sslineX' .$ss[ 'id' ]. '").css("background-color", bgc ) ;'  ;
+$html .=  '});';
+
+$html .=  "\n"."$( '#ssdate"      .$ss[ 'id' ]. "' ).change( function() ";
+$html .=  "\n".'{ $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSDATE", ' .$ss[ 'id' ]. ',  $("#ssdate' .$ss[ 'id' ]. '" ).val()] })}';
+$html .=  ");";
+
+$html .=  "\n"."var TodayDate = new Date();";
+$html .=  "\n".'var date = new Date( $("#ssdate' .$ss[ 'id' ]. '" ).val() ); ';
+$html .=  "\n".' if (date >= TodayDate) { bgc = "#FFFFFF";  } else { bgc = "#FF0000";  };';
+$html .=  "\n".' $( "#ssdate' .$ss[ 'id' ]. '").css("background-color", bgc ) ;'  ;
+
+$html .=  "$( '#ssdel"      .$ss[ 'id' ]. "' ).click( function() ";
+$html .=  "\n".'{ $( "#result" ).load( "inc/ajax.php", { "delete[]": ["SSDELE", ' .$ss[ 'id' ]. ',  $("#ssdel' .$ss[ 'id' ]. '" ).val()] }) ; $("#sslineX' .$ss[ 'id' ]. '" ).remove()   }';
+$html .=  ");";
+
+$html .=  "\n"."$('#drag-and-drop-zone" .$ss[ 'id' ]. "').dmUploader( ";
+$html .=  "\n"." {
+ url: 'backend/upload.php?ssid=" .$ss[ 'id' ]. "',
+ extFilter: [ 'jpg', 'pdf', 'png', 'gif' ],
+ maxFileSize: 3000000,
+ onDragEnter: function(){ this.addClass('active');    },
+ onDragLeave: function(){ this.removeClass('active'); },
+ onInit:      function(){ ui_add_log('Penguin initialized :)', 'info');
+  },
+ onComplete : function(){
+  },
+ onNewFile:   function(id, file){ ui_add_log('New file added #' + id);
+    ui_multi_add_file(id, file);
+  },
+  onBeforeUpload: function(id)
+ { ui_add_log('Starting the upload of #' + id);
+   ui_multi_update_file_status(id, 'uploading', 'Uploading...');
+   ui_multi_update_file_progress(id, 0, '', true);
+ },
+  onUploadCanceled: function(id)
+ {  ui_multi_update_file_progress(id, 0, 'warning', false);
+ },
+  onUploadProgress: function(id, percent){ ui_multi_update_file_progress(id, percent); },
+  onUploadSuccess: function(id, data)
+  { ui_add_log('Server Response for file #' + id + ': ' + JSON.stringify(data));
+    ui_add_log('Upload of file #' + id + ' COMPLETED', 'success');
+    ui_multi_update_file_status(id, 'success', 'Upload Complete');
+    ui_multi_update_file_progress(id, 100, 'success', false);
+    $( '#sscontent_" .$ss[ 'id' ]. "' ).load( 'inc/ajax.php', { 'load[]': ['SSCONT', " .$ss[ 'id' ]. " ] })
+
+    
+  },
+  onUploadError: function(id, xhr, status, message)
+  { ui_multi_update_file_status(id, 'danger', message);
+    ui_multi_update_file_progress(id, 0, 'danger', false);
+  },
+  onFallbackMode: function(){ ui_add_log('Plugin cant be used here, running Fallback callback', 'danger'); },
+  onFileSizeError: function(file){ /* ui_add_log('File '' + file.name + '' cannot be added: size excess limit', 'danger');*/ }
+}
+";
+$html .=  "\n".");";
+$html .=  '</script>';
+return $html;
+}
+
+
+function getPreviewScreen()
+{ $html  =  "\n" . ' <div class="wrap">';
+  $html .=  "\n" . '  <iframe class="frame" src="./index.php"></iframe>';
+  $html .=  "\n" . '</div>';
+  return $html;
+}
+
+
 function getHTML2()
 {
-
-$html['screenslide'] = <<<EOD
+  $html['screenslide'] = <<<EOD
 <!-- Fotorama -->
 <div class="fotorama"
   data-width="100%"
@@ -187,18 +436,18 @@ EOD;
   </button>
   <ul class="c-circle-menu__items">
     <li class="c-circle-menu__item" id="myButton1" >
-      <a href="Flyer_Studierendentagung_2023.html" class="c-circle-menu__link">
-        <img src="img/house.svg" alt="">
+      <div onclick="window.location='klausshow.php'" class="c-circle-menu__link">
+        <img src="img/search.svg" alt="">
+      </div>
+    </li>
+  <li class="c-circle-menu__item" id="myButton2" >
+      <a href="pong.html" class="c-circle-menu__link">
+        <img src="img/pong.svg" alt="">
       </a>
     </li>
-    <li class="c-circle-menu__item" id="myButton2" >
-      <a href="raum2.html" class="c-circle-menu__link">
-        <img src="img/photo.svg" alt="">
-      </a>
-    </li>
-    <li class="c-circle-menu__item" id="myButton3" >
+      <!--  <li class="c-circle-menu__item" id="myButton3" >
       <a href="exkursion.html" class="c-circle-menu__link">
-        <img src="img/pin.svg" alt="">
+        <img src="img/photo.svg" alt="">
       </a>
     </li>
     <li class="c-circle-menu__item" id="myButton4" >
@@ -206,11 +455,13 @@ EOD;
         <img src="img/search.svg" alt="">
       </a>
     </li>
+
     <li class="c-circle-menu__item" id="myButton5" >
       <a href="raumfinder.html" class="c-circle-menu__link">
         <img src="img/tools.svg" alt="">
       </a>
     </li>
+    -->
   </ul>
   <div class="c-circle-menu__mask js-menu-mask"></div>
 </nav>
@@ -223,17 +474,17 @@ EOD;
 
 <script>
 tippy('#myButton1', { allowHTML: true,   maxWidth: 'none',   placement: 'left',  offset: [0, 0],
-content: '<div class="tooltip">18. Hamburger Studierendentagung</div>',
+content: '<div class="tooltip">Klausurnoten</div>',
   });
  tippy('#myButton2', { allowHTML: true,   maxWidth: 'none',   placement: 'left', offset: [0, 0],
-	content: '<div  class="tooltip">Raumänderungen im Mai</div>',
+	content: '<div  class="tooltip">PONG!</div>',
   })
   tippy('#myButton3', { allowHTML: true,  maxWidth: 'none',    placement: 'left', offset: [0, 0],
-	content: '<div  class="tooltip">Exkursion für BT Studierende</div>',
+	content: '<div  class="tooltip">Laborinfos</div>',
   });
 
   tippy('#myButton4', { allowHTML: true,  maxWidth: 'none',    placement: 'left', offset: [0, 0],
-	content: '<div  class="tooltip">Klausurennoten</div>',
+	content: '<div  class="tooltip">Raumfinder</div>',
   });
 
   tippy('#myButton5', { allowHTML: true,  maxWidth: 'none',    placement: 'left', offset: [0, 0],
@@ -242,23 +493,41 @@ content: '<div class="tooltip">18. Hamburger Studierendentagung</div>',
 </script>
 EOD;
   
-  $html['editorhead'] = <<<EOD
+$html['editorhead'] = <<<EOD
+<!DOCTYPE html>
+<html>
+<head>
+<title>hallmonitor</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<script src="js/bootstrap.min.js"></script>
+
 <script src = "js/tinymce/tinymce.min.js"></script>
 <script src = "js/jquery-1.10.2.min.js"></script>
 <script src = "js/jquery-ui-1.13.2/jquery-ui.min.js"></script>
-<link  href = "js/jquery-ui-1.13.2/jquery-ui.min.css" rel="stylesheet" >
+
+<script src="js/dist/jquery.dm-uploader.min.js"></script>
+<script src="js/upload-ui.js"></script>
+<script src="js/upload-config.js"></script>
+
+
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/jquery.dm-uploader.min.css" rel="stylesheet">
+<link href="css/upload-styles.css" rel="stylesheet">
+<link href = "js/jquery-ui-1.13.2/jquery-ui.min.css" rel="stylesheet" >
 
 <style>
-  .ssline{  display: flex; border: solid 2px black; margin: 10px; padding: 10px; }
-  .ssspinner { width:40px }
+  .ssline, .ntline{  border: solid 1px black; margin: 2px; padding: 5px; }
+  .ssline {  display: flex;  }
+  .ssline2 {  border: solid 2px black; margin: 10px; padding: 10px; }
   .ssheader_, .sscontent {float:left;width:600px; border: solid 2px gray;}
-  .ssspinner, .ssheader_, .sscontent {  height:400px;   background-size: cover; margin-right: 10px; margin-left: 10px; }
+  .ssspinner, .ssheader_, .sscontent {  height:400px;   background-size: cover; margin-right:  0px; margin-left: 10px; }
+  .ssspinner { width:40px; margin-right: 0px;}
   .sscontent { overflow: auto;}
   .ssdate { font-size: 18px; height: 50px; }
-  .ssdel  {  padding: 15px; top: 50%; position: relative }
+  .ssdel  {  padding: 15px; margin:10px; margin-left:0px;  position: relative;  }
   .ssnew  {  padding: 15px; margin:10px; }
-  
-  .ssactive  {height: 40px; position: relative; width: 40px;}
+  .ssactive  {height: 40px; position: relative; margin:10px  ; margin-left:0px;width: 40px;}
 </style>
 
 
@@ -268,7 +537,7 @@ EOD;
 </style>
 
 <style>
-.ntline { background: #699B67; width: 1000px; padding: 5px; margin: 2px; }
+
 .nttext, .ntdate, .ntactive  { height: 40px; width: 40px; margin: 5px; }
 .ntactive  { position: relative; top: 13px }
 .nttext  { width: 600px; }
@@ -277,160 +546,15 @@ EOD;
 </style>
 
 <script src="js/tinymce/tinymce.min.js"></script>
+
+</head>
+
+<body style="padding-top: 0px;">
+
+
 EOD;
- return $html;
-}
-
-#deb($screenData);
-function getScreenSlideEditor($db)
-{
-  $screenData = getScreenData( $db );
-  $html = '';
-  if (isset($screenData))
-  foreach ( $screenData as $ss )
-  { $html.= getScreenSlideRow($ss);
-  }
-  
-  $html .=  "\n" . '<form action="editor.php" method="POST"> <div> <input type="submit" class="ssnew" name="action" id="ssnew" value=" NEW "></div></form>';
- 
-  $html .=  '<script>';
-  $html .=  "function dateHandler(e){ ;}";
-  $html .=  '</script>';
-  
   return $html;
 }
 
-
-function getScreenSlideRow($ss)
-{
-# deb($ss);
-#$ss ['id']
-#$ss['header']
-#$ss['content']
-#$ss ['best_before']
-#$ss ['img']
-#$ss['active']
-
-# style = "background-color: ' .$bgc.  '
-  #deb($ss[ 'content' ]);
- # $xml = simplexml_load_string( $ss[ 'content' ] );
-  #deb($xml);
-  #die();
-  if( $ss[ 'active'] == "true" ) { $chk = 'checked'; $bgc = '#FFFFFF'; } else { $chk = ''; $bgc = '#BEBEBE'; }
- 
-  $html  =  "\n" . '<div                           class = "ssline" id="sslineX' .$ss[ 'id' ]. '" style="background-color:' .$bgc. '"  > ';
-  $html .=  "\n" . '<div                           class = "ssline2" > <div   name ="ssheader_"  id = "ssheader__'  .$ss[ 'id' ]. '" class = "ssheader_" >'        .$ss[ 'header'  ]. '</div></div> ';
-  $html .=  "\n" . '<div                           class = "ssline2" > <input name ="ssspinner"  id = "ssspinner_'  .$ss[ 'id' ]. '" class = "ssspinner" value="'  .$ss[ 'img'     ]. '"></div>          ';
-  $html .=  "\n" . '<div                           class = "ssline2" > <div   name ="sscontent"  id = "sscontent_'  .$ss[ 'id' ]. '" class = "sscontent" >'        .$ss[ 'content' ]. '</div></div><div> ';
-  
-  $html .=  "\n" . ' <input type = "checkbox" class = "ssactive"  name ="ssactive" id = "ssactive'  .$ss[ 'id' ]. '" value="active" ' .$chk. ' ><br>';
-  $html .=  "\n" . ' <input type = "date"     class = "ssdate"    name ="ssdate"   id = "ssdate'    .$ss[ 'id' ]. '" value="'         .$ss[ 'best_before' ]. '" ><br>';
-  $html .=  "\n" . '<input type = "button"    class = "ssdel"     name ="action"   id = "ssdel'     .$ss[ 'id' ]. '" value=" DEL " >';
-  $html .=  "\n" . '</div>';
-  $html .=  "\n" . '</div>';
-  
-  $html .=  "\n".'<script>';
-  
-  $html .=  "\n".'$( "#ssspinner_'  .$ss[ 'id' ]. '" ).spinner(';
-  $html .=  "\n".'{ min:0,  change: function( event, uic' .$ss[ 'id' ]. ' )';
-  $html .=  "\n".' {  $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSPICH", ' .$ss[ 'id' ]. ',  $("#ssspinner_' .$ss[ 'id' ]. '" ).spinner( "value" ) ] } );   } ';
-  $html .=  "\n".', spin: function( event, uis' .$ss[ 'id' ]. ' ) ';
-  $html .=  "\n".' {  myurl = \'url( "i/\'+uis' .$ss[ 'id' ]. '.value+\'.jpg" )\'; '."\n".' $( "#ssheader__'  .$ss[ 'id' ]. '" ).css( "background-image" , myurl );} ';
-  $html .=  "\n".' }); ';
-  $html .=  "\n".'$( "#ssspinner_' .$ss[ 'id' ]. '" ).spinner( "value", '.$ss[ 'img' ].' );';
-  
-  $html .=  "\n".'tinymce.init(';
-  $html .=  "\n".'{selector: "#ssheader__'  .$ss[ 'id' ]. '",';
-  $html .=  "\n".'menubar: false,';
-  $html .=  "\n".'inline: true,';
-  $html .=  "\n".'toolbar: "undo redo | bold italic underline",';
-  $html .=  "\n".'content_css: "css/minicontent.css", ';
-  $html .=  "\n".'setup: (editor) => ';
-  $html .=  "\n".'{ editor.on("focusOut", () => ';
-  $html .=  "\n".'{ console.log(  $("#ssheader__' .$ss[ 'id' ]. '" ).html()  );  ';
-  $html .=  "\n".' $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSHEAD", ' .$ss[ 'id' ]. ',  $("#ssheader__' .$ss[ 'id' ]. '" ).html()] } );';
-  $html .=  "\n".'';
-  $html .=  "\n".' });';
-  $html .=  '}';
-  $html .=  '}); ';
-  
-  $html .=  "\n".'tinymce.init({';
-  $html .=  "\n".' selector: "#sscontent_'  .$ss[ 'id' ]. '",';
-  $html .=  "\n".' menubar: false,';
-  $html .=  "\n".' inline: true,';
-  $html .=  "\n".' toolbar: "undo redo | bold italic underline",';
-  $html .=  "\n".' content_css: "css/minicontent.css", ';
-
-  $html .=  "\n"."plugins: [";
-  $html .=  "\n"."'advlist autolink lists link image charmap print preview anchor',";
-  $html .=  "\n"." 'searchreplace visualblocks code fullscreen',";
-  $html .=  "\n"." 'insertdatetime media table paste code  wordcount'";
-  $html .=  "\n"."],";
-  $html .=  "\n"."toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat ',";
-#  $html .=  "\n"."  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'";
-  $html .=  "\n"."";
-  $html .=  "\n"."";
-  $html .=  "\n"."";
-  
-  
-  
- 
- 
-
-  
-
-
-
-
-  
-  
-  
-  $html .=  "\n".' setup: (editor) => ';
-  $html .=  "\n".' { editor.on("focusOut", () => ';
-  $html .=  "\n".' { console.log(  $("#sscontent_' .$ss[ 'id' ]. '" ).html()  );  ';
-  $html .=  "\n".' $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSCONT", ' .$ss[ 'id' ]. ',  $("#sscontent_' .$ss[ 'id' ]. '" ).html()] } );';
-  $html .=  "\n".' });}}); ';
-  $html .=  "\n".'';
-  $html .=  '';
-  $html .=  '';
-  $html .=  ' function success(){ ;} ';
-  $html .=  '';
-  $html .=  '';
-  
-  $html .=  "\n".'$( "#ssheader__' .$ss[ 'id' ]. '" ).css( "background-image" , "url( \'i/'  .$ss[ 'img' ]. '.jpg\' )" );';
-  
-  $html .=  "$( '#ssactive" .$ss[ 'id' ]. "' ).change( function()";
-  $html .=  '{';
-  $html .=  "\n".' $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSACTIV", ' .$ss[ 'id' ]. ',  $("#ssactive' .$ss[ 'id' ]. '" ).prop("checked") ] });';
-  $html .=  "\n".' if ($("#ssactive' .$ss[ 'id' ]. '" ).is(":checked")) { bgc = "#FFFFFF";  } else { bgc = "#BEBEBE";  };'  ;
-  $html .=  "\n".' $( "#sslineX' .$ss[ 'id' ]. '").css("background-color", bgc ) ;'  ;
-  $html .=  '});';
-  
-  $html .=  "\n"."$( '#ssdate"      .$ss[ 'id' ]. "' ).change( function() ";
-  $html .=  "\n".'{ $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSDATE", ' .$ss[ 'id' ]. ',  $("#ssdate' .$ss[ 'id' ]. '" ).val()] })}';
-  $html .=  ");";
-  
-  $html .=  "\n"."var TodayDate = new Date();";
-  $html .=  "\n".'var date = new Date( $("#ssdate' .$ss[ 'id' ]. '" ).val() ); ';
-  $html .=  "\n".' if (date >= TodayDate) { bgc = "#FFFFFF";  } else { bgc = "#FF0000";  };';
-  $html .=  "\n".' $( "#ssdate' .$ss[ 'id' ]. '").css("background-color", bgc ) ;'  ;
-  
-  
-  $html .=  "$( '#ssdel"      .$ss[ 'id' ]. "' ).click( function() ";
-  $html .=  "\n".'{ $( "#result" ).load( "inc/ajax.php", { "delete[]": ["SSDELE", ' .$ss[ 'id' ]. ',  $("#ssdel' .$ss[ 'id' ]. '" ).val()] }) ; $("#sslineX' .$ss[ 'id' ]. '" ).remove()   }';
-  $html .=  ");";
-  
-  $html .=  '</script>';
-  return $html;
-  
-}
-
-function getPreviewScreen()
-{
-  $html  =  "\n" . ' <div class="wrap">';
-  $html .=  "\n" . '  <iframe class="frame" src="./index.php"></iframe>';
-  $html .=  "\n" . '</div>';
-  return $html;
-}
 
 ?>

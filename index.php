@@ -22,19 +22,25 @@ if( !$cNr )
 }
 
 else
-{ $type = explode('.',  $screen[ $cNr ][ 'content' ] );
-  
+{
+  $type =  $screen[ $cNr ][ 'content' ];
   $isPDF = false;
-  foreach($type as $t)
-  {  if(strcmp( substr($t, 0,2) ,'pdf') ) { $isPDF = true;}
-  }
-  
-  if( $isPDF )
-  {
-    $del = array ('<p>','</p>');  ## HTML TAGS aus string entfernen
-    $screen[ $cNr ][ 'content' ] =  str_replace($del, '', $screen[ $cNr ][ 'content' ]);
+  $isIMG = false;
+ 
+  $del = array ('<p>','</p>');  ## HTML TAGS aus string entfernen
+  $screen[ $cNr ][ 'content' ] =  str_replace($del, '', $screen[ $cNr ][ 'content' ]);
 
-    $html[ 'content' ] = '<iframe src="backend/files/'.  $screen[ $cNr ][ 'content' ] .'#toolbar=0" width="100%" height="1060px"></iframe>';
+  $ss = substr(  $screen[ $cNr ][ 'content' ], -3 );
+  
+  if( $ss == 'pdf' )  { $format = 'pdf'; }
+  if( $ss  =='jpg' )  { $format = 'img'; }
+  if( $ss  =='png' )  { $format = 'img'; }
+  
+  if( $format == 'pdf' )
+  { $html[ 'content' ] = '<iframe src="backend/files/'.  $screen[ $cNr ][ 'content' ] .'#toolbar=0" width="100%" height="1060px"></iframe>';
+  }
+  else if( $format == 'img' )
+  { $html[ 'content' ] = '<img src="backend/files/'.  $screen[ $cNr ][ 'content' ] .'" width="100%" height="1080px"></img>';
   }
   else
   { $html[ 'content' ] = $screen[ $cNr ][ 'content' ];

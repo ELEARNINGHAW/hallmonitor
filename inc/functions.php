@@ -203,7 +203,8 @@ function getScreenSlideEditor($db)
   
   $html .=  "\n" . ' <div style ="float: left; margin-right: 50px;"> ';
   $html .=  '<button class="ssnew" ><a href="login/logout.php">Logout</a></button>';
-  $html .=  '<button class="ssnew" ><a href="upload-xls.php">EXCEL Upload</a></button>';
+  $html .=  '<button class="ssnew" ><a href="upload-xls-1.php">EXCEL W22 Upload</a></button>';
+  $html .=  '<button class="ssnew" ><a href="upload-xls-2.php">EXCEL S23 Upload</a></button>';
   $html .=  '</div>';
   $html .=  '</form>';
 
@@ -401,14 +402,12 @@ $html .=  '</script>';
 return $html;
 }
 
-
 function getPreviewScreen()
 { $html  =  "\n" . ' <div class="wrap">';
   $html .=  "\n" . '  <iframe class="frame" src="./index.php"></iframe>';
   $html .=  "\n" . '</div>';
   return $html;
 }
-
 
 function getHTML2()
 {
@@ -427,8 +426,6 @@ function getHTML2()
   data-swipe="false"
 >
 EOD;
-  
-  
   $html['menu'] = <<<EOD
 <nav class="c-circle-menu js-menu">
   <button class="c-circle-menu__toggle js-menu-toggle" onclick="startTimeOutTimer();">
@@ -436,21 +433,24 @@ EOD;
   </button>
   <ul class="c-circle-menu__items">
     <li class="c-circle-menu__item" id="myButton1" >
-      <div onclick="window.location='klausshow.php'" class="c-circle-menu__link">
+      <div onclick="window.location='klausshowW22.php'" class="c-circle-menu__link">
         <img src="img/search.svg" alt="">
       </div>
     </li>
+
   <li class="c-circle-menu__item" id="myButton2" >
       <a href="pong.html" class="c-circle-menu__link">
         <img src="img/pong.svg" alt="">
       </a>
     </li>
-      <!--  <li class="c-circle-menu__item" id="myButton3" >
-      <a href="exkursion.html" class="c-circle-menu__link">
-        <img src="img/photo.svg" alt="">
-      </a>
+    
+    <li class="c-circle-menu__item" id="myButton3" >
+      <div onclick="window.location='klausshowS23.php'" class="c-circle-menu__link">
+        <img src="img/search.svg" alt="">
+      </div>
     </li>
-    <li class="c-circle-menu__item" id="myButton4" >
+
+   <!--    <li class="c-circle-menu__item" id="myButton4" >
       <a href="klausurennoten.html" class="c-circle-menu__link">
         <img src="img/search.svg" alt="">
       </a>
@@ -462,6 +462,7 @@ EOD;
       </a>
     </li>
     -->
+
   </ul>
   <div class="c-circle-menu__mask js-menu-mask"></div>
 </nav>
@@ -474,13 +475,13 @@ EOD;
 
 <script>
 tippy('#myButton1', { allowHTML: true,   maxWidth: 'none',   placement: 'left',  offset: [0, 0],
-content: '<div class="tooltip">Klausurnoten</div>',
+content: '<div class="tooltip">Klausurnoten WS22</div>',
   });
  tippy('#myButton2', { allowHTML: true,   maxWidth: 'none',   placement: 'left', offset: [0, 0],
 	content: '<div  class="tooltip">PONG!</div>',
   })
   tippy('#myButton3', { allowHTML: true,  maxWidth: 'none',    placement: 'left', offset: [0, 0],
-	content: '<div  class="tooltip">Laborinfos</div>',
+	content: '<div  class="tooltip">Klausurnoten SS23</div>',
   });
 
   tippy('#myButton4', { allowHTML: true,  maxWidth: 'none',    placement: 'left', offset: [0, 0],
@@ -546,15 +547,11 @@ $html['editorhead'] = <<<EOD
 </style>
 
 <script src="js/tinymce/tinymce.min.js"></script>
-
 </head>
-
 <body style="padding-top: 0px;">
-
 
 EOD;
   return $html;
 }
-
 
 ?>

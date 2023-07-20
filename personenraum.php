@@ -147,10 +147,6 @@ $('#hover2').hover(function() {
     amount = '';
 });
 
-
-
- 	
-
 $( "#klaus" ).accordion({
  heightStyle: "content",
    collapsible: true,

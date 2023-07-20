@@ -80,7 +80,7 @@ if (isset($_FILES[ 'file' ]))
  try
  { $SQL = 'DELETE FROM "' . $semester.'"'; 
    $ret   = $db -> query( $SQL );
- # deb($ret,1);
+  
    $Reader = new SpreadsheetReader($file[ 'path' ]);
    foreach ($Reader as $Row)
    { ++$i; 
@@ -112,7 +112,7 @@ if (isset($_FILES[ 'file' ]))
 		$value = rtrim($value, "," );
 		
 		$SQL = 'INSERT INTO "' . $semester . '" ( ' .$varia. ' ) VALUES( '. $value. ' )';	
-		echo "\n".$SQL;
+ 
 		$ret   = $db -> query( $SQL );
       }	 
 	} unlink ($file[ 'path' ]); 

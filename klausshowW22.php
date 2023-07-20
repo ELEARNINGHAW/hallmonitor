@@ -67,7 +67,7 @@ function toggleKl( kid)
  $i = 0;
  $db    =  new SQLite3('../db/klausurnotenW.db' );
  $SQL = 'SELECT * FROM "' . $semester . '" ';	
-print_r($SQL);
+ 
  $ret   = $db -> query( $SQL );
 
  while ( $row = $ret -> fetchArray( ) )

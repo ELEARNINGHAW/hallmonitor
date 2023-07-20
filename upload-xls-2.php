@@ -112,7 +112,7 @@ if (isset($_FILES[ 'file' ]))
 		$value = rtrim($value, "," );
 		
 		$SQL = 'INSERT INTO "' . $semester . '" ( ' .$varia. ' ) VALUES( '. $value. ' )';	
-		echo "\n".$SQL;
+ 
 		$ret   = $db -> query( $SQL );
       }	 
 	} unlink ($file[ 'path' ]); 

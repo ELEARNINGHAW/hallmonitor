@@ -203,8 +203,9 @@ function getScreenSlideEditor($db)
   
   $html .=  "\n" . ' <div style ="float: left; margin-right: 50px;"> ';
   $html .=  '<button class="ssnew" ><a href="login/logout.php">Logout</a></button>';
-  $html .=  '<button class="ssnew" ><a href="upload-xls-1.php">EXCEL W22 Upload</a></button>';
-  $html .=  '<button class="ssnew" ><a href="upload-xls-2.php">EXCEL S23 Upload</a></button>';
+  $html .=  '<button class="ssnew" ><a href="upload-xls-1.php">EXCEL: W22 Upload</a></button>';
+  $html .=  '<button class="ssnew" ><a href="upload-xls-2.php">EXCEL: S23 Upload</a></button>';
+  $html .=  '<button class="ssnew" ><a href="upload-xls-0.php">EXCEL: PERSON-RAUM</a></button>';
   $html .=  '</div>';
   $html .=  '</form>';
 
@@ -439,23 +440,23 @@ EOD;
     </li>
 
   <li class="c-circle-menu__item" id="myButton2" >
-      <a href="pong.html" class="c-circle-menu__link">
-        <img src="img/pong.svg" alt="">
+          <div onclick="window.location='klausshowS23.php'" class="c-circle-menu__link">
+        <img src="img/search.svg" alt="">
       </a>
     </li>
     
     <li class="c-circle-menu__item" id="myButton3" >
-      <div onclick="window.location='klausshowS23.php'" class="c-circle-menu__link">
+      <div onclick="window.location='personenraum.php'" class="c-circle-menu__link">
         <img src="img/search.svg" alt="">
       </div>
     </li>
 
-   <!--    <li class="c-circle-menu__item" id="myButton4" >
-      <a href="klausurennoten.html" class="c-circle-menu__link">
-        <img src="img/search.svg" alt="">
+      <li class="c-circle-menu__item" id="myButton4" >
+     <div onclick="window.location='pong.html'" class="c-circle-menu__link">
+        <img src="img/pong.svg" alt="">
       </a>
     </li>
-
+ <!--
     <li class="c-circle-menu__item" id="myButton5" >
       <a href="raumfinder.html" class="c-circle-menu__link">
         <img src="img/tools.svg" alt="">
@@ -478,14 +479,14 @@ tippy('#myButton1', { allowHTML: true,   maxWidth: 'none',   placement: 'left', 
 content: '<div class="tooltip">Klausurnoten WS22</div>',
   });
  tippy('#myButton2', { allowHTML: true,   maxWidth: 'none',   placement: 'left', offset: [0, 0],
-	content: '<div  class="tooltip">PONG!</div>',
+	content: '<div  class="tooltip">Klausurnoten SS23</div>',
   })
   tippy('#myButton3', { allowHTML: true,  maxWidth: 'none',    placement: 'left', offset: [0, 0],
-	content: '<div  class="tooltip">Klausurnoten SS23</div>',
+	content: '<div  class="tooltip">Raumfinder</div>',
   });
 
   tippy('#myButton4', { allowHTML: true,  maxWidth: 'none',    placement: 'left', offset: [0, 0],
-	content: '<div  class="tooltip">Raumfinder</div>',
+	content: '<div  class="tooltip">PONG!</div>',
   });
 
   tippy('#myButton5', { allowHTML: true,  maxWidth: 'none',    placement: 'left', offset: [0, 0],

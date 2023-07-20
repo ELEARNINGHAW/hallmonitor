@@ -1,8 +1,7 @@
 <?php
 session_start();
 if( $_SESSION[ 'user_email' ] == "" )
-{ header( 'location:login/index.php' );
-}
+{ header( 'location:login/index.php' ); }
 ?>
 <!doctype html>
 <html lang="en">
@@ -36,96 +35,95 @@ if( $_SESSION[ 'user_email' ] == "" )
  */
 
 if (isset($_FILES[ 'file' ]))
-{	
+{
+  
   $file[ 'name' ] =  $_FILES[ 'file' ][ 'name' ];
   $file[ 'dir'  ] = 'backend/files/';
-  $file[ 'path' ] = [ 'dir'  ].$file[ 'name' ]  ;
+  $file[ 'path' ] = $file[ 'dir'  ].$file[ 'name' ]  ;
 
-  if (!is_writable($file[ 'dir' ])){ die( 'Keine Schreibrechte im Verzeichnis ' .$file[ 'dir'  ]); }
+  if (!is_writable( $file[ 'dir' ] ) ){ die( 'Keine Schreibrechte im Verzeichnis ' . $file[ 'dir'  ]); }
 
   if ( !move_uploaded_file( $_FILES['file']['tmp_name'], $file[ 'path' ] ))
   { throw new RuntimeException('Failed to move uploaded file.');
   }
-
-  // All good, send the response
-   echo json_encode([
+    // All good, send the response
+    echo json_encode([
         'status' => 'ok',
         'path'   => $file[ 'path' ]
-   ]);
+    ]);
  
    require('spreadsheet-reader/php-excel-reader/excel_reader2.php');
    require('spreadsheet-reader/SpreadsheetReader.php');
 
  $i = 0;
- $headlineNr = 4;   # In welcher XLS Zeile sind die Bezeichner der Spalten
- $semester = '23S'; # Semestername = Tabellenname
+ $headlineNr = 3;   # In welcher XLS Zeile sind die Bezeichner der Spalten
+ $table = 'users'; # Semestername = Tabellenname
  
- $heads[ 0 ][ 'xslName' ] = "Prüfender(in)"  ;
- $heads[ 1 ][ 'xslName' ] = "Prüfung"	     ;
- $heads[ 2 ][ 'xslName' ] = "Prüfungsnr."	 ;
- $heads[ 3 ][ 'xslName' ] = "matrikelnr"	 ;
- $heads[ 4 ][ 'xslName' ] = "bewertung"      ;
- $heads[ 0 ][ 'dbName'  ] = "Prüfende(r)"    ;
- $heads[ 1 ][ 'dbName'  ] = "Prüfung"        ;
- $heads[ 2 ][ 'dbName'  ] = "Prüfungsnr"     ;
- $heads[ 3 ][ 'dbName'  ] = "Matnr3"         ;
- $heads[ 4 ][ 'dbName'  ] = "Bewertung1Dez"  ;
-
- $db    =  new SQLite3('../db/klausurnotenS.db' );
+ $heads[ 0 ][ 'dbName'  ] = "name"     ;
+ $heads[ 1 ][ 'dbName'  ] = "vorname"  ;
+ $heads[ 2 ][ 'dbName'  ] = "titel"    ;
+ $heads[ 3 ][ 'dbName'  ] = "telefon"  ;
+ $heads[ 4 ][ 'dbName'  ] = "email"    ;
+ $heads[ 5 ][ 'dbName'  ] = "raum"     ;
+ $heads[ 6 ][ 'dbName'  ] = "aufzug"   ;
+ $heads[ 7 ][ 'dbName'  ] = "bereich"  ;
+ $heads[ 8 ][ 'dbName'  ] = "einheit"  ;
+ 
+ $db    =  new SQLite3('../db/personenraum.db' );
  
  if (isset($_GET['File']))
  {  $file[ 'path' ] = $_GET['File'];
  }
 
  try
- { $SQL = 'DELETE FROM "' . $semester.'"'; 
+ { $SQL = 'DELETE FROM "' . $table.'"';
    $ret   = $db -> query( $SQL );
- 
    $Reader = new SpreadsheetReader($file[ 'path' ]);
+   $order  = array("\r\n", "\n", "\r");
    foreach ($Reader as $Row)
-   { ++$i; 
-     if ( $i == $headlineNr )
-	 { foreach( $Row as $rk=> $rv )
-	   { foreach( $heads as $hk => $hv )
-		 {  if ( $hv['xslName'] == $rv )  { $heads[$hk]['colNr'] = $rk; }
-		 }
-	   }
+   {
+     $tmp[ 'name'    ] =  str_replace( $order, '', trim( $Row[ 0 ] ) ) ;
+     $tmp[ 'vorname' ] =  str_replace( $order, '', trim( $Row[ 1 ] ) ) ;
+     $tmp[ 'titel'   ] =  str_replace( $order, '', trim( $Row[ 2 ] ) ) ;
+     $tmp[ 'telefon' ] =  str_replace( $order, '', trim( $Row[ 3 ] ) ) ;
+     $tmp[ 'email'   ] =  str_replace( $order, '', trim( $Row[ 4 ] ) ) ;
+     $tmp[ 'raum'    ] =  str_replace( $order, '', trim( $Row[ 5 ] ) ) ;
+     $tmp[ 'aufzug'  ] =  str_replace( $order, '', trim( $Row[ 6 ] ) ) ;
+     $tmp[ 'bereich' ] =  str_replace( $order, '', trim( $Row[ 7 ] ) ) ;
+     $tmp[ 'einheit' ] =  str_replace( $order, '', trim( $Row[ 8 ] ) ) ;
+     
+     if ( $i++ == $headlineNr )
+	 {
 	 }	
-     elseif ($i > $headlineNr)
-	 { $varia = $value = '';
-	   foreach( $heads as $hk => $hv ) 
-	   { $val0 = $Row[ $hv['colNr'] ];
-		 if      ( $heads[  $hk ][ 'xslName' ] == 'matrikelnr' ) 
- 		 { $val = substr($val0 , -3) ; }
- 
-         else if ( $heads[  $hk ][ 'xslName' ] == 'bewertung' )   
-	    { if (ctype_digit(trim($val0)))  { $val0= $val0.'_'; $val = $val0[0].'.'.$val0[1]; }
-       	  else                           { $val = $val0; } 
-		}
-		else                             { $val = $val0; }
-        
-        $varia .= '"'. $hv['dbName'] .'",';
-	    $value .= '"'. $val .'",';
+     elseif ($i > $headlineNr  AND $tmp[ 'name' ] != '' AND  $tmp[ 'raum' ]  != '')
+	 {
+       $varia = $value = '';
+       foreach( $tmp as $rk => $rv )
+       {
+         $varia .= trim( $rk ).',';
+	     $value .= '"'.trim( $rv ).'",';
 	   }
-   
-		$varia = rtrim($varia, "," );
-		$value = rtrim($value, "," );
-		
-		$SQL = 'INSERT INTO "' . $semester . '" ( ' .$varia. ' ) VALUES( '. $value. ' )';	
-		echo "\n".$SQL;
-		$ret   = $db -> query( $SQL );
-      }	 
-	} unlink ($file[ 'path' ]); 
+      
+       $varia .= rtrim( $varia, "," );
+       $value .= rtrim( $value, "," );
+       
+       $SQL = 'INSERT INTO "' . $table . '" ( ' .$varia. ' ) VALUES( '. $value. ' )';
+	    echo "\n".$SQL;
+       $ret   = $db -> query( $SQL );
+       
+     }
+  } unlink ($file[ 'path' ]);
    }
   catch (Exception $E)
   { echo $E -> getMessage();
   }
 }
-else 
+
+else
 {
 ?>
- <div id="drag-and-drop-zone-2" class="dm-uploader p-5">
-   <h3 class="mb-5 mt-5 text-muted">EXCEL S23</h3>
+ <div id="drag-and-drop-zone-0" class="dm-uploader p-5">
+   <h3 class="mb-5 mt-5 text-muted">EXCEL: PERSONEN-RAUM</h3>
    <div class="btn btn-primary btn-block mb-5">
      <span>open</span>
      <input type="file"  title='Click to add Files' />
@@ -136,11 +134,9 @@ else
 }
 ?>
  
-<div id="output" style ="width:100%; heigth:50px; background-color:#CCCCCC;" >123</div>
-
-
+<div id="output" style ="width:100%; heigth:50px; background-color:#CCCCCC;" ></div>
 <div  style ="float: right; margin-right: 50px;" ><button class="ssnew" ><a href="login/logout.php">Logout</a></button></div>
 <div  style ="float: right; margin-right: 50px;" ><button class="ssnew" ><a href="editor.php">EDITOR</a></button></div>
 
-  </body>
+</body>
 </html>

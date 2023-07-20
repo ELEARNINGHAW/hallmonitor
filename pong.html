@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width">
+<link rel="stylesheet" href="css/bootstrap.min.css" />
+<link rel="stylesheet"  type="text/css" href="css/circle-menu.min.css">
+<script src="js/mousemove.js"></script>
+</head>
+
+<body id="buehne" onload="startTimeOutTimer();">
+	<div class="row"><div class="col-md-4" ><h1 style="font-size: 50px;"></h1></div>
+	<div class="col-md-4" style="font-size: 50px; ">DU: <span id="playerScore">0</span></div>
+	<div class="col-md-4" style="font-size: 50px; ">PONG: <span id="computerScore">0</span></div></div>
+	<canvas id="stage" style="width:100%; height:100%; background-color: black;"></canvas>
+	
+	
+	<nav class="c-circle-menu js-menu">
+  <button class="c-circle-menu__toggle is-active js-menu-toggle">
+    <a href="index.php"><span>Toggle</span></a>
+  </button>
+</nav>
+	
+	
+	
+	<script src="js/jquery-1.11.0.min.js"></script>
+	<script src="js/easeljs.min.js"></script>
+	<script src="js/js-toolbox.js"></script>
+	<script>
+
+		createjs.Shape.prototype.hitTestObject = function(oObject) {
+			// first we have to calculate the
+			// center of each rectangle and half of
+			// width and height
+			var rect1 = {x: this.x - this.width/2, y:this.y- this.height/2, width: this.width, height: this.height};
+			var rect2 = {x: oObject.x - oObject.width/2, y:oObject.y- oObject.height/2, width: oObject.width, height: oObject.height};
+			var dx, dy, r1 = {}, r2 = {};
+			r1.cx = rect1.x + (r1.hw = (rect1.width / 2));
+			r1.cy = rect1.y + (r1.hh = (rect1.height / 4));
+			r2.cx = rect2.x + (r2.hw = (rect2.width / 2));
+			r2.cy = rect2.y + (r2.hh = (rect2.height / 4));
+
+			dx = Math.abs(r1.cx - r2.cx) - (r1.hw + r2.hw);
+			dy = Math.abs(r1.cy - r2.cy) - (r1.hh + r2.hh);
+
+			if (dx < 0 && dy < 0) {
+				dx = Math.min(Math.min(rect1.width, rect2.width), -dx);
+				dy = Math.min(Math.min(rect1.height, rect2.height), -dy);
+				return {
+					x : Math.max(rect1.x, rect2.x),
+					y : Math.max(rect1.y, rect2.y),
+					width : dx,
+					height : dy,
+					rect1 : rect1,
+					rect2 : rect2
+				};
+			} else {
+				return null;
+			}
+		}
+
+		var Pong = Toolbox.Base
+				.extend({
+					ballSpeedX : -5,
+					ballSpeedY : -3,
+					ballRadius : 5,
+					paddleHeight : 40,
+					constructor : function() {
+						//initialize createjs objects
+						this.stage = new createjs.Stage(document.getElementById("stage"));
+						this.ball = new createjs.Shape();
+						this.cpuPaddle = new createjs.Shape();
+						this.playerPaddle = new createjs.Container();
+
+						
+						createjs.Ticker.setFPS(60);
+						createjs.Ticker.addEventListener("tick", jQuery.proxy(
+								this.loop, this));
+						createjs.Ticker.addEventListener("tick", jQuery.proxy(
+								this.moveCpuPaddle, this));
+						createjs.Ticker.addEventListener("tick", jQuery.proxy(
+								this.hitTestBall, this));
+						this.stage.addChild(this.ball);
+						this.ball.graphics.beginFill('rgba(255,255,255,1)');
+						this.ball.graphics.drawCircle(this.ballRadius,
+								this.ballRadius, this.ballRadius);
+						this.ball.regX = this.ball.regY = this.ballRadius;
+						this.ball.width = this.ballRadius *2;
+						this.ball.height = this.ballRadius *2;
+						// start in the middle eh
+						this.ball.x = this.stage.canvas.width / 2;
+						this.ball.y = this.stage.canvas.height / 2;
+
+						// now do player paddle
+						this.stage.mouseMoveOutside = true;
+						var oRectangle = new createjs.Shape();
+						oRectangle.graphics
+								.beginFill('rgba(255,255,255,1)');
+						oRectangle.graphics.drawRect(0, 0,
+								this.ballRadius * 2, this.paddleHeight);
+						this.playerPaddle.addChild(oRectangle);
+						this.stage.addChild(this.playerPaddle);
+						this.playerPaddle.regX = this.ballRadius;
+						this.playerPaddle.regY = this.paddleHeight / 2
+						// start on the left eh
+						this.playerPaddle.x = 20;
+						this.playerPaddle.y = this.stage.canvas.height / 2;
+						this.stage.on("stagemousemove", this.movePlayerPaddle, this);
+
+						// now do cpu paddle
+						this.stage.addChild(this.cpuPaddle);
+						this.cpuPaddle.graphics
+								.beginFill('rgba(255,255,255,1)');
+						this.cpuPaddle.graphics.drawRect(0, 0,
+								this.ballRadius * 2, this.paddleHeight);
+						this.cpuPaddle.regX = this.ballRadius;
+						this.cpuPaddle.regY = this.paddleHeight / 2
+						// start on the right eh
+						this.cpuPaddle.x = this.stage.canvas.width - 20;
+						this.cpuPaddle.y = this.stage.canvas.height / 2;
+						
+						// now set width and height of both
+						this.cpuPaddle.width = this.playerPaddle.width = this.ballRadius * 2;
+						this.cpuPaddle.height = this.playerPaddle.height = this.paddleHeight;
+						this.stage.update();
+					},
+					cpuScore : 0,
+					playerScore : 0,
+					loop : function() {
+						this.ball.x += this.ballSpeedX;
+						this.ball.y += this.ballSpeedY;
+						if (this.ball.x <= this.ballRadius) {
+							this.ball.x = this.ballRadius;
+							this.ballSpeedX *= -1;
+							this.cpuScore++;
+							this.updateTextFields();
+						} else if (this.ball.x >= this.stage.canvas.width
+								- this.ballRadius) {
+							this.ball.x = this.stage.canvas.width
+									- this.ballRadius;
+							this.ballSpeedX *= -1;
+							this.playerScore++;
+							this.updateTextFields();
+						}
+
+						if (this.ball.y <= this.ballRadius) {
+							this.ball.y = this.ballRadius;
+							this.ballSpeedY *= -1;
+						} else if (this.ball.y >= this.stage.canvas.height
+								- this.ballRadius) {
+							this.ball.y = this.stage.canvas.height
+									- this.ballRadius;
+							this.ballSpeedY *= -1;
+						}
+					},
+					updateTextFields : function() {
+						jQuery("#playerScore").html(this.playerScore);
+						jQuery("#computerScore").html(this.cpuScore);
+
+					},
+					movePlayerPaddle : function(evt) {
+						this.playerPaddle.y = evt.stageY;
+						//constrain the paddle to the stage
+						if (this.playerPaddle.y - this.paddleHeight / 2 < 0) {
+							this.playerPaddle.y = this.paddleHeight / 2;
+						} else if (this.playerPaddle.y + this.paddleHeight / 2 > this.stage.canvas.height) {
+							this.playerPaddle.y = this.stage.canvas.height
+									- this.paddleHeight / 2;
+						}
+						this.stage.update();
+					},
+					cpuPaddleSpeed : 3,
+					moveCpuPaddle : function() {
+						if (this.cpuPaddle.y < this.ball.y - 10) {
+							this.cpuPaddle.y += this.cpuPaddleSpeed;
+						} else if (this.cpuPaddle.y > this.ball.y + 10) {
+							this.cpuPaddle.y -= this.cpuPaddleSpeed;
+						}
+
+						if (this.cpuPaddle.y - this.paddleHeight / 2 < 0) {
+							this.cpuPaddle.y = this.paddleHeight / 2;
+						} else if (this.cpuPaddle.y + this.paddleHeight / 2 > this.stage.canvas.height) {
+							this.cpuPaddle.y = this.stage.canvas.height
+									- this.paddleHeight / 2;
+						}
+
+					},
+					hitTestBall : function() {
+						if (this.ball.hitTestObject(this.playerPaddle) != null) {
+							if (this.ballSpeedX < 0) {
+								this.ballSpeedX *= -1;
+								this.ballSpeedY = this.calculateBallAngle(this.playerPaddle.y,
+										this.ball.y);
+							}
+						} else if (this.cpuPaddle.hitTestObject(this.ball) != null) {
+							if (this.ballSpeedX > 0) {
+								this.ballSpeedX *= -1;
+								this.ballSpeedY = this.calculateBallAngle(this.cpuPaddle.y,
+										this.ball.y);
+							}
+						}
+						this.stage.update();
+
+					},
+
+					calculateBallAngle : function(ballY, paddleY) {
+						var ySpeed = 5 * ((ballY - paddleY) / 25);
+
+						return ySpeed;
+
+					}
+
+				});
+
+		jQuery(document).ready(function() {
+
+			new Pong();
+
+		});
+	</script>
+</body>
+</html>

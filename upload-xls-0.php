@@ -33,10 +33,19 @@ if( $_SESSION[ 'user_email' ] == "" )
             default:                    throw new RuntimeException('Unknown errors.');
     }
  */
+$heads[ 0 ][ 'dbName'  ] = "name"     ;
+$heads[ 1 ][ 'dbName'  ] = "vorname"  ;
+$heads[ 2 ][ 'dbName'  ] = "titel"    ;
+$heads[ 3 ][ 'dbName'  ] = "telefon"  ;
+$heads[ 4 ][ 'dbName'  ] = "email"    ;
+$heads[ 5 ][ 'dbName'  ] = "raum"     ;
+$heads[ 6 ][ 'dbName'  ] = "aufzug"   ;
+$heads[ 7 ][ 'dbName'  ] = "bereich"  ;
+$heads[ 8 ][ 'dbName'  ] = "einheit"  ;
+
 
 if (isset($_FILES[ 'file' ]))
 {
-  
   $file[ 'name' ] =  $_FILES[ 'file' ][ 'name' ];
   $file[ 'dir'  ] = 'backend/files/';
   $file[ 'path' ] = $file[ 'dir'  ].$file[ 'name' ]  ;
@@ -52,35 +61,29 @@ if (isset($_FILES[ 'file' ]))
         'path'   => $file[ 'path' ]
     ]);
  
-   require('spreadsheet-reader/php-excel-reader/excel_reader2.php');
-   require('spreadsheet-reader/SpreadsheetReader.php');
-
  $i = 0;
  $headlineNr = 3;   # In welcher XLS Zeile sind die Bezeichner der Spalten
- $table = 'users'; # Semestername = Tabellenname
- 
- $heads[ 0 ][ 'dbName'  ] = "name"     ;
- $heads[ 1 ][ 'dbName'  ] = "vorname"  ;
- $heads[ 2 ][ 'dbName'  ] = "titel"    ;
- $heads[ 3 ][ 'dbName'  ] = "telefon"  ;
- $heads[ 4 ][ 'dbName'  ] = "email"    ;
- $heads[ 5 ][ 'dbName'  ] = "raum"     ;
- $heads[ 6 ][ 'dbName'  ] = "aufzug"   ;
- $heads[ 7 ][ 'dbName'  ] = "bereich"  ;
- $heads[ 8 ][ 'dbName'  ] = "einheit"  ;
+
  
  $db    =  new SQLite3('../db/personenraum.db' );
  
  if (isset($_GET['File']))
  {  $file[ 'path' ] = $_GET['File'];
  }
-
- try
- { $SQL = 'DELETE FROM "' . $table.'"';
+  
+  try
+ { $SQL = 'DELETE FROM users';
    $ret   = $db -> query( $SQL );
-   $Reader = new SpreadsheetReader($file[ 'path' ]);
+   
    $order  = array("\r\n", "\n", "\r");
-   foreach ($Reader as $Row)
+   $R = null;
+   if (($handle = fopen($file[ 'path' ], "r")) !== FALSE)
+   { while (($Reader = fgetcsv($handle, 1000, ";")) !== FALSE)
+     $R[] = $Reader;
+     fclose($handle);
+   }
+   
+   foreach ($R as $Row)
    {
      $tmp[ 'name'    ] =  str_replace( $order, '', trim( $Row[ 0 ] ) ) ;
      $tmp[ 'vorname' ] =  str_replace( $order, '', trim( $Row[ 1 ] ) ) ;
@@ -107,7 +110,7 @@ if (isset($_FILES[ 'file' ]))
        $varia .= rtrim( $varia, "," );
        $value .= rtrim( $value, "," );
        
-       $SQL = 'INSERT INTO "' . $table . '" ( ' .$varia. ' ) VALUES( '. $value. ' )';
+       $SQL = 'INSERT INTO users ( ' .$varia. ' ) VALUES( '. $value. ' )';
 	    echo "\n".$SQL;
        $ret   = $db -> query( $SQL );
        
@@ -121,15 +124,31 @@ if (isset($_FILES[ 'file' ]))
 
 else
 {
+  echo '<div style="padding: 20px; margin:10px; color:white; float: left; width: 130px; border: solid 2px #666666;">';
+  echo 'Spaltennamen <br>' ;
+  echo '[A] '.$heads[ 0 ][ 'dbName'  ] . " <br>" ;
+  echo '[B] '.$heads[ 1 ][ 'dbName'  ] . " <br>" ;
+  echo '[C] '.$heads[ 2 ][ 'dbName'  ] . " <br>" ;
+  echo '[D] '.$heads[ 3 ][ 'dbName'  ] . " <br>" ;
+  echo '[E] '.$heads[ 4 ][ 'dbName'  ] . " <br>" ;
+  echo '[F] '.$heads[ 5 ][ 'dbName'  ] . " <br>" ;
+  echo '[G] '.$heads[ 6 ][ 'dbName'  ] . " <br>" ;
+  echo '[H] '.$heads[ 7 ][ 'dbName'  ] . " <br>" ;
+  echo '[I] '.$heads[ 8 ][ 'dbName'  ] . " <br>" ;
+  echo '</div>';
 ?>
  <div id="drag-and-drop-zone-0" class="dm-uploader p-5">
-   <h3 class="mb-5 mt-5 text-muted">EXCEL: PERSONEN-RAUM</h3>
+   <h3 class="mb-5 mt-5 text-muted">CSV DATEI: PERSONEN-RAUM</h3>
    <div class="btn btn-primary btn-block mb-5">
      <span>open</span>
      <input type="file"  title='Click to add Files' />
-     
+    
    </div>
- </div> 
+     <div style="padding: 20px; margin:10px; color:white;   border: solid 2px #666666;">
+    Datensatz wird aktezpiert: Wenn [A] 'name' und [F] 'raum' vorhanden ist.
+     </div>
+
+ </div>
 <?php	
 }
 ?>

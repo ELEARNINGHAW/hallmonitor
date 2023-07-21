@@ -6,7 +6,7 @@ $(function(){
 
  var dndini_0 = {
  url: 'upload-xls-0.php',
- extFilter: [ 'xlsx', 'xls' , 'odt'  ],
+ extFilter: [   'csv'  ],
  maxFileSize: 5000000,
  onDragEnter: function(){ this.addClass('active');    },
  onDragLeave: function(){ this.removeClass('active'); },
@@ -39,7 +39,7 @@ $(function(){
 
 var dndini_1 = {
     url: 'upload-xls-1.php',
-    extFilter: [ 'xlsx', 'xls'  ],
+    extFilter: [   'csv'  ],
     maxFileSize: 5000000,
     onDragEnter: function(){ this.addClass('active');    },
     onDragLeave: function(){ this.removeClass('active'); },

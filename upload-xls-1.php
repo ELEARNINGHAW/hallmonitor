@@ -35,6 +35,25 @@ if( $_SESSION[ 'user_email' ] == "" )
     }
  */
 
+$headlineNr = 4;   # In welcher XLS Zeile sind die Bezeichner der Spalten
+$semester = '22W'; # Semestername = Tabellenname
+$heads[ 0 ][ 'csvName' ] = "Prüfender(in)"  ; #
+$heads[ 1 ][ 'csvName' ] = "Prüfung"	     ; #
+$heads[ 2 ][ 'csvName' ] = "Prüfungsnr."	 ; #
+$heads[ 3 ][ 'csvName' ] = "matrikelnr"	 ; #
+$heads[ 4 ][ 'csvName' ] = "bewertung"      ; #
+$heads[ 0 ][ 'dbName'  ] = "Prüfende(r)"    ;
+$heads[ 1 ][ 'dbName'  ] = "Prüfung"        ;
+$heads[ 2 ][ 'dbName'  ] = "Prüfungsnr"     ;
+$heads[ 3 ][ 'dbName'  ] = "Matnr3"         ;
+$heads[ 4 ][ 'dbName'  ] = "Bewertung1Dez"  ;
+$heads[ 0 ][ 'csvrow'     ] =  13    ;
+$heads[ 1 ][ 'csvrow'     ] =  14     ;
+$heads[ 2 ][ 'csvrow'     ] =  16    ;
+$heads[ 3 ][ 'csvrow'     ] =  0      ;
+$heads[ 4 ][ 'csvrow'     ] =  1  ;
+
+
 if (isset($_FILES[ 'file' ]))
 {	
   $file[ 'name' ] =  $_FILES[ 'file' ][ 'name' ];
@@ -53,23 +72,7 @@ if (isset($_FILES[ 'file' ]))
         'path'   => $file[ 'path' ]
     ]);
  
-   require('spreadsheet-reader/php-excel-reader/excel_reader2.php');
-   require('spreadsheet-reader/SpreadsheetReader.php');
-
  $i = 0;
- $headlineNr = 4;   # In welcher XLS Zeile sind die Bezeichner der Spalten
- $semester = '22W'; # Semestername = Tabellenname
- 
- $heads[ 0 ][ 'xslName' ] = "Prüfender(in)"  ;
- $heads[ 1 ][ 'xslName' ] = "Prüfung"	     ;
- $heads[ 2 ][ 'xslName' ] = "Prüfungsnr."	 ;
- $heads[ 3 ][ 'xslName' ] = "matrikelnr"	 ;
- $heads[ 4 ][ 'xslName' ] = "bewertung"      ;
- $heads[ 0 ][ 'dbName'  ] = "Prüfende(r)"    ;
- $heads[ 1 ][ 'dbName'  ] = "Prüfung"        ;
- $heads[ 2 ][ 'dbName'  ] = "Prüfungsnr"     ;
- $heads[ 3 ][ 'dbName'  ] = "Matnr3"         ;
- $heads[ 4 ][ 'dbName'  ] = "Bewertung1Dez"  ;
 
  $db    =  new SQLite3('../db/klausurnotenW.db' );
  
@@ -79,43 +82,51 @@ if (isset($_FILES[ 'file' ]))
 
  try
  { $SQL = 'DELETE FROM "' . $semester.'"'; 
-   $ret   = $db -> query( $SQL );
+ 
+   if (($handle = fopen($file[ 'path' ], "r")) !== FALSE)
+   { while (($Reader = fgetcsv($handle, 1000, ";")) !== FALSE)
+     $R[] = $Reader;
+     fclose($handle);
+   }
   
-   $Reader = new SpreadsheetReader($file[ 'path' ]);
-   foreach ($Reader as $Row)
-   { ++$i; 
-     if ( $i == $headlineNr )
-	 { foreach( $Row as $rk=> $rv )
-	   { foreach( $heads as $hk => $hv )
-		 {  if ( $hv['xslName'] == $rv )  { $heads[$hk]['colNr'] = $rk; }
-		 }
-	   }
-	 }	
-     elseif ($i > $headlineNr)
-	 { $varia = $value = '';
-	   foreach( $heads as $hk => $hv ) 
-	   { $val0 = $Row[ $hv['colNr'] ];
-		 if      ( $heads[  $hk ][ 'xslName' ] == 'matrikelnr' ) 
+   foreach ($R as $Row)
+   {
+       if ( $headlineNr < $i++
+       AND trim($Row[ $heads[ 0 ][ 'csvrow' ] ] ) != ''
+       AND trim($Row[ $heads[ 1 ][ 'csvrow' ] ] ) != ''
+       AND trim($Row[ $heads[ 2 ][ 'csvrow' ] ] ) != ''
+       AND trim($Row[ $heads[ 3 ][ 'csvrow' ] ] ) != ''
+       AND trim($Row[ $heads[ 4 ][ 'csvrow' ] ] ) != '' )
+	  { $varia = $value = '';
+       foreach( $heads as $hk => $hv )
+	   {
+     
+         $var0 = $hv[ 'dbName' ]          ;
+         $val0 = $Row[ $hv[ 'csvrow' ] ]  ;
+         
+		 if     (  $hv[ 'csvrow' ]  == 0 )
  		 { $val = substr($val0 , -3) ; }
  
-         else if ( $heads[  $hk ][ 'xslName' ] == 'bewertung' )   
-	    { if (ctype_digit(trim($val0)))  { $val0= $val0.'_'; $val = $val0[0].'.'.$val0[1]; }
-       	  else                           { $val = $val0; } 
-		}
+         else if (  $hv[ 'csvrow' ]  == 1 )
+	     { if (ctype_digit(trim($val0)))  { $val0= $val0.'_'; $val = $val0[0].'.'.$val0[1]; }
+           else                           { $val = $val0; }
+		 }
+   
 		else                             { $val = $val0; }
         
-        $varia .= '"'. $hv['dbName'] .'",';
+        $varia .= '"'. $var0 .'",';
 	    $value .= '"'. $val .'",';
-	   }
+        
+        }
    
 		$varia = rtrim($varia, "," );
 		$value = rtrim($value, "," );
 		
-		$SQL = 'INSERT INTO "' . $semester . '" ( ' .$varia. ' ) VALUES( '. $value. ' )';	
- 
-		$ret   = $db -> query( $SQL );
+		$SQL = 'INSERT INTO "' . $semester . '" ( ' .$varia. ' ) VALUES( '. $value. ' )';
+	 
+        $ret   = $db -> query( $SQL );
       }	 
-	} unlink ($file[ 'path' ]); 
+	} unlink ($file[ 'path' ]);
    }
   catch (Exception $E)
   { echo $E -> getMessage();
@@ -123,13 +134,24 @@ if (isset($_FILES[ 'file' ]))
 }
 else 
 {
+  echo '<div style="padding: 20px; margin:10px; color:white; float: left; width: 180px; border: solid 2px #666666;">';
+  echo 'Spaltennamen <br>' ;
+  echo '[A] '.$heads[ 3 ][ 'csvName'  ] . " <br>" ;
+  echo '[B] '.$heads[ 4 ][ 'csvName'  ] . " <br>" ;
+  echo '[N] '.$heads[ 0 ][ 'csvName'  ] . " <br>" ;
+  echo '[O] '.$heads[ 1 ][ 'csvName'  ] . " <br>" ;
+  echo '[Q] '.$heads[ 2 ][ 'csvName'  ] . " <br>" ;
+  echo '</div>';
+  
 ?>
  <div id="drag-and-drop-zone-1" class="dm-uploader p-5">
    <h3 class="mb-5 mt-5 text-muted">EXCEL W22</h3>
    <div class="btn btn-primary btn-block mb-5">
      <span>open</span>
      <input type="file"  title='Click to add Files' />
-     
+   </div>  <div style="padding: 20px; margin:10px; color:white;   border: solid 2px #666666;">
+           Datensatz wird aktezpiert: Wenn Daten in [A] UND [B]  UND [N]  UND [O] UND [Q] vorhanden ist.
+      
    </div>
  </div> 
 <?php	

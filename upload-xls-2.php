@@ -74,7 +74,7 @@ if (isset($_FILES[ 'file' ]))
  
  $i = 0;
 
- $db    =  new SQLite3('../db/klausurnotenW.db' );
+ $db    =  new SQLite3('../db/klausurnotenS.db' );
  
  if (isset($_GET['File']))
  {  $file[ 'path' ] = $_GET['File'];

@@ -73,7 +73,7 @@ var dndini_1 = {
 
 var dndini_2 = {
     url: 'upload-xls-2.php',
-    extFilter: [ 'xlsx', 'xls'  ],
+    extFilter: [   'csv'  ],
     maxFileSize: 5000000,
     onDragEnter: function(){ this.addClass('active');    },
     onDragLeave: function(){ this.removeClass('active'); },

@@ -145,7 +145,7 @@ else
   
 ?>
  <div id="drag-and-drop-zone-2" class="dm-uploader p-5">
-   <h3 class="mb-5 mt-5 text-muted">EXCEL W22</h3>
+   <h3 class="mb-5 mt-5 text-muted">CSV S23</h3>
    <div class="btn btn-primary btn-block mb-5">
      <span>open</span>
      <input type="file"  title='Click to add Files' />

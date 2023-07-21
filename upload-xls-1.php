@@ -81,10 +81,13 @@ if (isset($_FILES[ 'file' ]))
  }
 
  try
- { $SQL = 'DELETE FROM "' . $semester.'"'; 
- 
-   if (($handle = fopen($file[ 'path' ], "r")) !== FALSE)
-   { while (($Reader = fgetcsv($handle, 1000, ";")) !== FALSE)
+ { $SQL = 'DELETE FROM "' . $semester.'"';
+   $ret = $db -> query( $SQL );
+  
+   $order  = array("\r\n", "\n", "\r");
+   
+   if ( ( $handle = fopen( $file[ 'path' ], "r" ) ) !== FALSE )
+   { while ( ( $Reader = fgetcsv($handle, 1000, ";")) !== FALSE)
      $R[] = $Reader;
      fclose($handle);
    }
@@ -100,8 +103,9 @@ if (isset($_FILES[ 'file' ]))
 	  { $varia = $value = '';
        foreach( $heads as $hk => $hv )
 	   {
-     
-         $var0 = $hv[ 'dbName' ]          ;
+      
+         $var0 =  str_replace( $order, '', trim( $hv[ 'dbName' ]  ) ) ;
+#         $var0 = $hv[ 'dbName' ]          ;
          $val0 = $Row[ $hv[ 'csvrow' ] ]  ;
          
 		 if     (  $hv[ 'csvrow' ]  == 0 )

@@ -145,12 +145,12 @@ else
   
 ?>
  <div id="drag-and-drop-zone-2" class="dm-uploader p-5">
-   <h3 class="mb-5 mt-5 text-muted">CSV S23</h3>
+   <h3 class="mb-5 mt-5 text-muted">NOTEN.CSV S23</h3>
    <div class="btn btn-primary btn-block mb-5">
      <span>open</span>
      <input type="file"  title='Click to add Files' />
    </div>  <div style="padding: 20px; margin:10px; color:white;   border: solid 2px #666666;">
-           Datensatz wird aktezpiert: Wenn Daten in [A] UND [B]  UND [N]  UND [O] UND [Q] vorhanden ist.
+           Datensatz wird aktezpiert: Wenn Daten in ALLEN Spalten [A][B][N][O][Q] vorhanden ist.
       
    </div>
  </div> 

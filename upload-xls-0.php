@@ -138,7 +138,7 @@ else
   echo '</div>';
 ?>
  <div id="drag-and-drop-zone-0" class="dm-uploader p-5">
-   <h3 class="mb-5 mt-5 text-muted">CSV DATEI: PERSONEN-RAUM</h3>
+   <h3 class="mb-5 mt-5 text-muted">PERSONEN-RAUM.CSV</h3>
    <div class="btn btn-primary btn-block mb-5">
      <span>open</span>
      <input type="file"  title='Click to add Files' />

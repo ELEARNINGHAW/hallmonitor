@@ -203,9 +203,9 @@ function getScreenSlideEditor($db)
   
   $html .=  "\n" . ' <div style ="float: left; margin-right: 50px;"> ';
   $html .=  '<button class="ssnew" ><a href="login/logout.php">Logout</a></button>';
-  $html .=  '<button class="ssnew" ><a href="upload-xls-1.php">EXCEL: W22 Upload</a></button>';
-  $html .=  '<button class="ssnew" ><a href="upload-xls-2.php">EXCEL: S23 Upload</a></button>';
-  $html .=  '<button class="ssnew" ><a href="upload-xls-0.php">EXCEL: PERSON-RAUM</a></button>';
+  $html .=  '<button class="ssnew" ><a href="upload-xls-1.php">CSV: W22 Upload</a></button>';
+  $html .=  '<button class="ssnew" ><a href="upload-xls-2.php">CSV: S23 Upload</a></button>';
+  $html .=  '<button class="ssnew" ><a href="upload-xls-0.php">CSV: PERSON-RAUM</a></button>';
   $html .=  '</div>';
   $html .=  '</form>';
 

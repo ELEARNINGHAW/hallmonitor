@@ -85,7 +85,7 @@ list-style: none; }
 
 .mo { color: #FFFFFF; padding: 0px; cursor: default; font-family: 'Oxygen';
   text-outline: 15px 15px #000000;
-  text-shadow: #000 10px 10px 85px;
+  text-shadow: #000 2px 2px 5px;
   -webkit-font-smoothing: antialiased
 }
 
@@ -95,12 +95,13 @@ list-style: none; }
 .fotorama .any {
 	text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
 	font-family: Georgia, serif;
-	font-size: 72px;
+	font-size: 95px;
 	text-align: center;
 	height: 100%;
 	box-sizing: border-box;
 	padding-top: 100px;
 	line-height: normal;
+  padding-top: 50px;
 }
 
 .fotorama .inverse {

@@ -55,8 +55,7 @@ $heads[ 4 ][ 'csvrow'     ] =  1  ;
 
 
 if (isset($_FILES[ 'file' ]))
-{	
-  $file[ 'name' ] =  $_FILES[ 'file' ][ 'name' ];
+{ $file[ 'name' ] =  $_FILES[ 'file' ][ 'name' ];
   $file[ 'dir'  ] = 'backend/files/';
   $file[ 'path' ] = [ 'dir'  ].$file[ 'name' ]  ;
 
@@ -93,8 +92,7 @@ if (isset($_FILES[ 'file' ]))
    }
   
    foreach ($R as $Row)
-   {
-       if ( $headlineNr < $i++
+   {   if ( $headlineNr < $i++
        AND trim($Row[ $heads[ 0 ][ 'csvrow' ] ] ) != ''
        AND trim($Row[ $heads[ 1 ][ 'csvrow' ] ] ) != ''
        AND trim($Row[ $heads[ 2 ][ 'csvrow' ] ] ) != ''
@@ -102,10 +100,7 @@ if (isset($_FILES[ 'file' ]))
        AND trim($Row[ $heads[ 4 ][ 'csvrow' ] ] ) != '' )
 	  { $varia = $value = '';
        foreach( $heads as $hk => $hv )
-	   {
-      
-         $var0 =  str_replace( $order, '', trim( $hv[ 'dbName' ]  ) ) ;
-#         $var0 = $hv[ 'dbName' ]          ;
+	   { $var0 =  str_replace( $order, '', trim( $hv[ 'dbName' ]  ) ) ;
          $val0 = $Row[ $hv[ 'csvrow' ] ]  ;
          
 		 if     (  $hv[ 'csvrow' ]  == 0 )
@@ -115,19 +110,15 @@ if (isset($_FILES[ 'file' ]))
 	     { if (ctype_digit(trim($val0)))  { $val0= $val0.'_'; $val = $val0[0].'.'.$val0[1]; }
            else                           { $val = $val0; }
 		 }
-   
 		else                             { $val = $val0; }
-        
         $varia .= '"'. $var0 .'",';
 	    $value .= '"'. $val .'",';
-        
         }
    
 		$varia = rtrim($varia, "," );
 		$value = rtrim($value, "," );
-		
+	
 		$SQL = 'INSERT INTO "' . $semester . '" ( ' .$varia. ' ) VALUES( '. $value. ' )';
-	 
         $ret   = $db -> query( $SQL );
       }	 
 	} unlink ($file[ 'path' ]);
@@ -137,34 +128,29 @@ if (isset($_FILES[ 'file' ]))
   }
 }
 else 
-{
-  echo '<div style="padding: 20px; margin:10px; color:white; float: left; width: 180px; border: solid 2px #666666;">';
+{ echo '<div style="padding: 20px; margin:10px; color:white; float: left; width: 180px; border: solid 2px #666666;">';
   echo 'Spaltennamen <br>' ;
   echo '[A] '.$heads[ 3 ][ 'csvName'  ] . " <br>" ;
   echo '[B] '.$heads[ 4 ][ 'csvName'  ] . " <br>" ;
   echo '[N] '.$heads[ 0 ][ 'csvName'  ] . " <br>" ;
   echo '[O] '.$heads[ 1 ][ 'csvName'  ] . " <br>" ;
   echo '[Q] '.$heads[ 2 ][ 'csvName'  ] . " <br>" ;
+  echo 'Seperator = Semikolon'         . " <br>" ;
   echo '</div>';
-  
 ?>
  <div id="drag-and-drop-zone-1" class="dm-uploader p-5">
    <h3 class="mb-5 mt-5 text-muted">NOTEN.CSV W22</h3>
+   <h3 id='log' class="mb-5 mt-5 text-muted"></h3>
    <div class="btn btn-primary btn-block mb-5">
      <span>open</span>
      <input type="file"  title='Click to add Files' />
-   </div>  <div style="padding: 20px; margin:10px; color:white;   border: solid 2px #666666;">
-         Datensatz wird aktezpiert: Wenn Daten in ALLEN Spalten [A][B][N][O][Q] vorhanden ist.
-      
-   </div>
+   </div><div style="padding: 20px; margin:10px; color:white;   border: solid 2px #666666;"> Datensatz wird aktezpiert: Wenn Daten in ALLEN Spalten [A][B][N][O][Q] vorhanden sind. </div>
  </div> 
 <?php	
 }
 ?>
  
 <div id="output" style ="width:100%; heigth:50px; background-color:#CCCCCC;" >123</div>
-
-
 <div  style ="float: right; margin-right: 50px;" ><button class="ssnew" ><a href="login/logout.php">Logout</a></button></div>
 <div  style ="float: right; margin-right: 50px;" ><button class="ssnew" ><a href="editor.php">EDITOR</a></button></div>
 

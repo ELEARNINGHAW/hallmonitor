@@ -45,8 +45,7 @@ $heads[ 8 ][ 'dbName'  ] = "einheit"  ;
 
 
 if (isset($_FILES[ 'file' ]))
-{
-  $file[ 'name' ] =  $_FILES[ 'file' ][ 'name' ];
+{ $file[ 'name' ] =  $_FILES[ 'file' ][ 'name' ];
   $file[ 'dir'  ] = 'backend/files/';
   $file[ 'path' ] = $file[ 'dir'  ].$file[ 'name' ]  ;
 
@@ -84,8 +83,7 @@ if (isset($_FILES[ 'file' ]))
    }
    
    foreach ($R as $Row)
-   {
-     $tmp[ 'name'    ] =  str_replace( $order, '', trim( $Row[ 0 ] ) ) ;
+   { $tmp[ 'name'    ] =  str_replace( $order, '', trim( $Row[ 0 ] ) ) ;
      $tmp[ 'vorname' ] =  str_replace( $order, '', trim( $Row[ 1 ] ) ) ;
      $tmp[ 'titel'   ] =  str_replace( $order, '', trim( $Row[ 2 ] ) ) ;
      $tmp[ 'telefon' ] =  str_replace( $order, '', trim( $Row[ 3 ] ) ) ;
@@ -99,11 +97,9 @@ if (isset($_FILES[ 'file' ]))
 	 {
 	 }	
      elseif ($i > $headlineNr  AND $tmp[ 'name' ] != '' AND  $tmp[ 'raum' ]  != '')
-	 {
-       $varia = $value = '';
+	 { $varia = $value = '';
        foreach( $tmp as $rk => $rv )
-       {
-         $varia .= trim( $rk ).',';
+       { $varia .= trim( $rk ).',';
 	     $value .= '"'.trim( $rv ).'",';
 	   }
       
@@ -111,11 +107,9 @@ if (isset($_FILES[ 'file' ]))
        $value .= rtrim( $value, "," );
        
        $SQL = 'INSERT INTO users ( ' .$varia. ' ) VALUES( '. $value. ' )';
-	    echo "\n".$SQL;
        $ret   = $db -> query( $SQL );
-       
      }
-  } unlink ($file[ 'path' ]);
+   } unlink ($file[ 'path' ]);
    }
   catch (Exception $E)
   { echo $E -> getMessage();
@@ -135,24 +129,25 @@ else
   echo '[G] '.$heads[ 6 ][ 'dbName'  ] . " <br>" ;
   echo '[H] '.$heads[ 7 ][ 'dbName'  ] . " <br>" ;
   echo '[I] '.$heads[ 8 ][ 'dbName'  ] . " <br>" ;
+  echo 'Seperator = Semikolon'         . " <br>" ;
   echo '</div>';
 ?>
  <div id="drag-and-drop-zone-0" class="dm-uploader p-5">
    <h3 class="mb-5 mt-5 text-muted">PERSONEN-RAUM.CSV</h3>
-   <div class="btn btn-primary btn-block mb-5">
+   <h3 id='log' class="mb-5 mt-5 text-muted"></h3>
+
+
+     <div class="btn btn-primary btn-block mb-5">
      <span>open</span>
      <input type="file"  title='Click to add Files' />
-    
-   </div>
+     </div>
      <div style="padding: 20px; margin:10px; color:white;   border: solid 2px #666666;">
     Datensatz wird aktezpiert: Wenn [A] 'name' und [F] 'raum' vorhanden ist.
      </div>
-
  </div>
 <?php	
 }
 ?>
- 
 <div id="output" style ="width:100%; heigth:50px; background-color:#CCCCCC;" ></div>
 <div  style ="float: right; margin-right: 50px;" ><button class="ssnew" ><a href="login/logout.php">Logout</a></button></div>
 <div  style ="float: right; margin-right: 50px;" ><button class="ssnew" ><a href="editor.php">EDITOR</a></button></div>

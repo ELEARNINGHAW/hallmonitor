@@ -144,16 +144,18 @@ else
   echo '[N] '.$heads[ 0 ][ 'csvName'  ] . " <br>" ;
   echo '[O] '.$heads[ 1 ][ 'csvName'  ] . " <br>" ;
   echo '[Q] '.$heads[ 2 ][ 'csvName'  ] . " <br>" ;
+  echo 'Seperator = Semikolon'         . " <br>" ;
   echo '</div>';
   
 ?>
  <div id="drag-and-drop-zone-2" class="dm-uploader p-5">
    <h3 class="mb-5 mt-5 text-muted">NOTEN.CSV S23</h3>
+    <h3 id='log' class="mb-5 mt-5 text-muted"></h3>
    <div class="btn btn-primary btn-block mb-5">
      <span>open</span>
      <input type="file"  title='Click to add Files' />
    </div>  <div style="padding: 20px; margin:10px; color:white;   border: solid 2px #666666;">
-           Datensatz wird aktezpiert: Wenn Daten in ALLEN Spalten [A][B][N][O][Q] vorhanden ist.
+           Datensatz wird aktezpiert: Wenn Daten in ALLEN Spalten [A][B][N][O][Q] vorhanden sind.
       
    </div>
  </div> 

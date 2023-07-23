@@ -31,11 +31,12 @@ else
   $type =  $screen[ $cNr ][ 'content' ];
   $isPDF = false;
   $isIMG = false;
- 
+  $format = '';
+  
   $del = array ('<p>','</p>');  ## HTML TAGS aus string entfernen
   $screen[ $cNr ][ 'content' ] =  str_replace($del, '', $screen[ $cNr ][ 'content' ]);
 
-  $ss = substr(  $screen[ $cNr ][ 'content' ], -3 );
+  $ss = strtolower( substr(  $screen[ $cNr ][ 'content' ], -3 ) );
   
   if( $ss == 'pdf' )  { $format = 'pdf'; }
   if( $ss  =='jpg' )  { $format = 'img'; }

@@ -39,3 +39,19 @@ hr {
 
 	border-style: solid;
 }
+
+.mb-51
+{
+  margin: 10px !important;
+}
+
+.mb-5
+{
+  margin: 10px !important;
+}
+
+
+.btn-block {
+
+  width: 85%;
+}

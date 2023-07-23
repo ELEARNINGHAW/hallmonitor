@@ -65,7 +65,7 @@ function actionHandler( $db )
   if( isset( $post['action'] ) )
   { if ( $post['action'] == ' NEW ')
     $ss ['best_before'] =  $datepreset =  date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d") + 7 , date("Y")));
-    $ss ['img'] = rand(1, 30);
+    $ss ['img'] = rand(1, 40);
     
     {
       $stmt = $db->prepare( 'INSERT INTO slidescreen (header, content, best_before, img , active )  VALUES ("" , "" , ? ,  ? , "true" )' );
@@ -226,14 +226,12 @@ function getScreenslideData( $html, $screen, $today, $screenslide )
         AND $sc[ 'content' ] != '<p><br></p>' )
       { $sc[ 'header' ] = '<a href="index.php?cNr=' .$sc['id'] . '">' .$sc['header']. '<p  style="position:absolute;top: 900px; width:100%; text-align:center;  font-size: xx-large ;">[weitere Infos >>]</p></a>' ;
       }
-        $html[ 'screenslide' ] .= '<div data-img="i/jpg/lo/' . $sc['img'] . '-lo.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
+        $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
       }
     }
   $html['screenslide'] .= '</div>';
   return $html['screenslide'] ;
 }
-
-
 
 
 function getScreenSlideRow($ss)
@@ -257,7 +255,7 @@ $html .=  "\n" . ' <input type = "date"     class = "ssdate"    name ="ssdate"  
 $html .=  "\n" . ' <input type = "checkbox" class = "ssactive"  name ="ssactive" id = "ssactive'  .$ss[ 'id' ]. '" value="active" ' .$chk. ' ><br>';
 
 $html .=  "\n" . '<div id="drag-and-drop-zone' .$ss[ 'id' ]. '" class="dm-uploader">';
-$html .=  "\n" . '<h3 class="mb-5 mt-5 text-muted">PDF</h3> ';
+$html .=  "\n" . '<h3 class="mb-51 text-muted">PDF<br/>JGP<br/>PNG</h3> ';
 $html .=  "\n" . '<div class="btn btn-primary btn-block mb-5"> ';
 $html .=  "\n" . '<span>open</span> ';
 $html .=  "\n" . '<input type="file"  title="Click to add Files" /> ';
@@ -274,12 +272,12 @@ $html .=  "\n".'<script>';
 $html .=  "\n".' $( "#ssspinner_'  .$ss[ 'id' ]. '" ).spinner(';
 $html .=  "\n".' { ';
 $html .=  "\n".' min:0, ';
-$html .=  "\n".' max:30, ';
+$html .=  "\n".' max:40, ';
 $html .=  "\n".' icons: { down: "custom-down-icon", up: "custom-up-icon" }, ';
 $html .=  "\n".' change: function( event, uic' .$ss[ 'id' ]. ' )';
 $html .=  "\n".' {  $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSPICH", ' .$ss[ 'id' ]. ',  $("#ssspinner_' .$ss[ 'id' ]. '" ).spinner( "value" ) ] } );   } ';
 $html .=  "\n".', spin: function( event, uis' .$ss[ 'id' ]. ' ) ';
-$html .=  "\n".' {  myurl = \'url( "i/jpg/lo/\'+uis' .$ss[ 'id' ]. '.value+\'-lo.jpg" )\'; '."\n".' $( "#ssheader__'  .$ss[ 'id' ]. '" ).css( "background-image" , myurl );} ';
+$html .=  "\n".' {  myurl = \'url( "i/jpg/full/\'+uis' .$ss[ 'id' ]. '.value+\'.jpg" )\'; '."\n".' $( "#ssheader__'  .$ss[ 'id' ]. '" ).css( "background-image" , myurl );} ';
 $html .=  "\n".' }); ';
 $html .=  "\n".' $( "#ssspinner_' .$ss[ 'id' ]. '" ).spinner( "value", '.$ss[ 'img' ].' );';
 
@@ -336,7 +334,7 @@ $html .=  ' function success(){ ;} ';
 $html .=  '';
 $html .=  '';
 
-$html .=  "\n".'$( "#ssheader__' .$ss[ 'id' ]. '" ).css( "background-image" , "url( \'i/jpg/lo/'  .$ss[ 'img' ]. '-lo.jpg\' )" );';
+$html .=  "\n".'$( "#ssheader__' .$ss[ 'id' ]. '" ).css( "background-image" , "url( \'i/jpg/full/'  .$ss[ 'img' ]. '.jpg\' )" );';
 
 $html .=  "$( '#ssactive" .$ss[ 'id' ]. "' ).change( function()";
 $html .=  '{';

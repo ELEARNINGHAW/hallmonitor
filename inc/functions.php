@@ -221,7 +221,7 @@ function getScreenslideData( $html, $screen, $today, $screenslide )
       else {$intime = 'false'; }
      
       if ( $sc[ 'active' ] == 'true' AND $intime   ==  'true' )
-      {  $c = (filter_var( strip_tags(  $sc['content'])  , FILTER_VALIDATE_URL) );
+      {  $c =  strip_tags(  $sc['content'] );
          $h = (filter_var( strip_tags(  $sc['header'])   , FILTER_VALIDATE_URL) );
 
          if ($h)

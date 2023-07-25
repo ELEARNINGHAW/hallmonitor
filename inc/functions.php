@@ -67,8 +67,7 @@ function actionHandler( $db )
     $ss ['best_before'] =  $datepreset =  date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d") + 7 , date("Y")));
     $ss ['img'] = rand(1, 40);
     
-    {
-      $stmt = $db->prepare( 'INSERT INTO slidescreen (header, content, best_before, img , active )  VALUES ("" , "" , ? ,  ? , "true" )' );
+    { $stmt = $db->prepare( 'INSERT INTO slidescreen (header, content, best_before, img , active )  VALUES ("" , "" , ? ,  ? , "true" )' );
       $stmt->bindValue( 1 , $ss ['best_before'] , SQLITE3_TEXT );
       $stmt->bindValue( 2 , $ss ['img']         , SQLITE3_TEXT );
       $res = $stmt->execute();
@@ -101,8 +100,7 @@ function actionHandler( $db )
    # $SQL  = 'UPDATE newsticker SET ';
     
     if ( isset ( $nt[ 'nttext'   .$ntNr ] ) )
-    {
-      $stmt = $db->prepare( 'UPDATE newsticker SET text = ? WHERE id = ?' );
+    { $stmt = $db->prepare( 'UPDATE newsticker SET text = ? WHERE id = ?' );
       $stmt->bindValue( 1 , $nt[ 'nttext'.$ntNr  ] , SQLITE3_TEXT );
       $stmt->bindValue( 2 , $ntNr                  , SQLITE3_TEXT );
       $res = $stmt->execute();
@@ -135,15 +133,14 @@ function actionHandler( $db )
 function getNewstickerEditor($db)
 { $html = '<div class="ntline">';
   $newsticker  = getNewstickerData( $db, true );
-  if(isset ($newsticker))
+  if( isset ( $newsticker ) )
   foreach ( $newsticker as $nt )
   { if( $nt[ 'active' ]  == 1 ) { $chk = 'checked'; $bgc = '#FFFFFF'; } else { $chk = ''; $bgc = '#BEBEBE'; }
-    
-    
     $chk = ''; if($nt['active']) {$chk = 'checked'; }
     $html .= '<div class="ntline" id="netline'   .$nt[ 'id' ]. '" style="background-color: '.$bgc.';"  >'."\n";
     $html .=  '<form action="editor.php" method="post" id = "ntform' .$nt[ 'id' ]. '">';
     $html .=  '<span> <input type="text"      class="nttext"   name="nttext'   .$nt[ 'id' ]. '" id="nttext'   .$nt[ 'id' ]. '" value="'.       $nt[ 'text'        ].'" ></span>'."\n";
+    $html .=  '<span> <input type="date"      class="ntdate"   name="ntsdate'  .$nt[ 'id' ]. '" id="ntsdate'  .$nt[ 'id' ]. '" value="'.       $nt[ 'start_on'    ].'" ></span> '."\n";
     $html .=  '<span> <input type="date"      class="ntdate"   name="ntdate'   .$nt[ 'id' ]. '" id="ntdate'   .$nt[ 'id' ]. '" value="'.       $nt[ 'best_before' ].'" ></span> '."\n";
     $html .=  '<span> <input type="checkbox"  class="ntactive" name="ntactive' .$nt[ 'id' ]. '" id="ntactive' .$nt[ 'id' ]. '" value="active'. $nt[ 'id'          ].'" ' .$chk. ' ></span>'."\n";
     $html .=  '<span> <input type="hidden"    class="ntid"     name="ntid"                      id="ntid'     .$nt[ 'id' ]. '" value="'.       $nt[ 'id'          ].'" ></span>'."\n";
@@ -188,8 +185,7 @@ function deb($val, $kill= false)
 }
 
 function getScreenSlideEditor($db)
-{
-  $screenData = getScreenData( $db );
+{ $screenData = getScreenData( $db );
   $html = '<div id="result"></div>';
   if (isset($screenData))
   foreach ( $screenData as $ss )
@@ -216,18 +212,30 @@ function getScreenSlideEditor($db)
   return $html;
 }
 
-
 function getScreenslideData( $html, $screen, $today, $screenslide )
 { $html[ 'screenslide' ] =  $screenslide;
-  if (isset($html[ 'screenslide' ]))
-    foreach ($screen as $sc)
-    { if ( $sc[ 'active' ] == 'true' AND $today <= strtotime( $sc['best_before']) )
-      { if ( $sc[ 'content' ] AND $sc[ 'content' ] != '<p><br data-mce-bogus="1"></p>'
-        AND $sc[ 'content' ] != '<p><br></p>' )
-      { $sc[ 'header' ] = '<a href="index.php?cNr=' .$sc['id'] . '">' .$sc['header']. '<p  style="position:absolute;top: 900px; width:100%; text-align:center;  font-size: xx-large ;">[weitere Infos >>]</p></a>' ;
-      }
-        $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
-      }
+  if ( isset( $html[ 'screenslide' ] ) )
+    foreach ( $screen as $sc )
+    { if   ( $today >= ( strtotime( $sc[ 'start_on' ] ) ) AND  ( $today <= strtotime( $sc[ 'best_before' ] ) ) )
+      {     $intime = 'true';  }
+      else {$intime = 'false'; }
+     
+      if ( $sc[ 'active' ] == 'true' AND $intime   ==  'true' )
+      {  $c = (filter_var( strip_tags(  $sc['content'])  , FILTER_VALIDATE_URL) );
+         $h = (filter_var( strip_tags(  $sc['header'])   , FILTER_VALIDATE_URL) );
+
+         if ($h)
+         { $html['screenslide'] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse" style="padding-top: 0px;"><iframe width="1920" height="1100"  allowfullscreen = "true" referrerpolicy="unsafe-url"    src="' . $h . '"></iframe></div>' . "\n"; }
+  
+         else if ( $c )
+         { $sc[ 'header' ] = '<a href="index.php?cNr=' .$sc['id'] . '">' .$sc['header']. '<p  style="position:absolute;top: 900px; width:100%; text-align:center;  font-size: xx-large ;">[weitere Infos >>]</p></a>' ;
+           $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
+        }
+  
+        else
+        { $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
+        }
+       }
     }
   $html['screenslide'] .= '</div>';
   return $html['screenslide'] ;
@@ -251,7 +259,8 @@ $html .=  "\n" . '<div                           class = "ssline2" > <input name
 $html .=  "\n" . '<div                           class = "ssline2" > <div   name ="sscontent'  .$ss[ 'id' ]. '"  id = "sscontent_'  .$ss[ 'id' ]. '" class = "sscontent" >'        .$ss[ 'content' ]. '</div></div><div> ';
 
 $html .=  "\n" . '<div                      class = "ssline2"   id = "ssblockC'    .$ss[ 'id' ]. '">';
-$html .=  "\n" . ' <input type = "date"     class = "ssdate"    name ="ssdate"   id = "ssdate'    .$ss[ 'id' ]. '" value="'         .$ss[ 'best_before' ]. '" ><br>';
+$html .=  "\n" . ' <input type = "date"     class = "ssdate"    name ="sssdate"  id = "sssdate'   .$ss[ 'id' ]. '" value="'         .$ss[ 'start_on'    ]. '" ><br>';
+$html .=  "\n" . ' <input type = "date"     class = "ssdate"    name ="ssedate"  id = "ssedate'   .$ss[ 'id' ]. '" value="'         .$ss[ 'best_before' ]. '" ><br>';
 $html .=  "\n" . ' <input type = "checkbox" class = "ssactive"  name ="ssactive" id = "ssactive'  .$ss[ 'id' ]. '" value="active" ' .$chk. ' ><br>';
 
 $html .=  "\n" . '<div id="drag-and-drop-zone' .$ss[ 'id' ]. '" class="dm-uploader">';
@@ -343,9 +352,14 @@ $html .=  "\n".' if ($("#ssactive' .$ss[ 'id' ]. '" ).is(":checked")) { bgc = "#
 $html .=  "\n".' $( "#sslineX' .$ss[ 'id' ]. '").css("background-color", bgc ) ;'  ;
 $html .=  '});';
 
-$html .=  "\n"."$( '#ssdate"      .$ss[ 'id' ]. "' ).change( function() ";
-$html .=  "\n".'{ $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSDATE", ' .$ss[ 'id' ]. ',  $("#ssdate' .$ss[ 'id' ]. '" ).val()] })}';
+$html .=  "\n"."$( '#ssedate"      .$ss[ 'id' ]. "' ).change( function() ";
+$html .=  "\n".'{ $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSEDATE", ' .$ss[ 'id' ]. ',  $("#ssedate' .$ss[ 'id' ]. '" ).val()] })}';
 $html .=  ");";
+
+$html .=  "\n"."$( '#sssdate"      .$ss[ 'id' ]. "' ).change( function() ";
+$html .=  "\n".'{ $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSSDATE", ' .$ss[ 'id' ]. ',  $("#sssdate' .$ss[ 'id' ]. '" ).val()] })}';
+$html .=  ");";
+
 
 $html .=  "\n"."var TodayDate = new Date();";
 $html .=  "\n".'var date = new Date( $("#ssdate' .$ss[ 'id' ]. '" ).val() ); ';

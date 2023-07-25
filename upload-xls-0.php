@@ -53,6 +53,11 @@ if (isset($_FILES[ 'file' ]))
 
   if ( !move_uploaded_file( $_FILES['file']['tmp_name'], $file[ 'path' ] ))
   { throw new RuntimeException('Failed to move uploaded file.');
+    echo "NOT upload!";
+  }
+  else
+  {
+  
   }
     // All good, send the response
     echo json_encode([
@@ -109,7 +114,7 @@ if (isset($_FILES[ 'file' ]))
        $SQL = 'INSERT INTO users ( ' .$varia. ' ) VALUES( '. $value. ' )';
        $ret   = $db -> query( $SQL );
      }
-   } unlink ($file[ 'path' ]);
+   } #unlink ($file[ 'path' ]);
    }
   catch (Exception $E)
   { echo $E -> getMessage();
@@ -141,7 +146,7 @@ else
      <span>open</span>
      <input type="file"  title='Click to add Files' />
      </div>
-     <div style="padding: 20px; margin:10px; color:white;   border: solid 2px #666666;">
+     <div style="padding: 20px; margin:10px; margin-left: 100px;  color:white;   border: solid 2px #666666;">
     Datensatz wird aktezpiert: Wenn [A] 'name' und [F] 'raum' vorhanden ist.
      </div>
  </div>

@@ -1,7 +1,3 @@
-  /*
-   * Some helper functions to work with our UI and keep our code cleaner
-   */
-
 // Adds an entry to our debug area
 function ui_add_log(message, color)
 {

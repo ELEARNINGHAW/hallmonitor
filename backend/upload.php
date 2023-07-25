@@ -1,5 +1,4 @@
 <?php
- 
 header('Content-type:application/json;charset=utf-8');
 
 try { if ( !isset($_FILES['file']['error']) ||   is_array($_FILES['file']['error']) )

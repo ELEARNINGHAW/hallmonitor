@@ -58,7 +58,7 @@ if (isset($_FILES[ 'file' ]))
 {	
   $file[ 'name' ] =  $_FILES[ 'file' ][ 'name' ];
   $file[ 'dir'  ] = 'backend/files/';
-  $file[ 'path' ] = [ 'dir'  ].$file[ 'name' ]  ;
+  $file[ 'path' ] = $file[ 'dir'  ].$file[ 'name' ]  ;
 
   if (!is_writable($file[ 'dir' ])){ die( 'Keine Schreibrechte im Verzeichnis ' .$file[ 'dir'  ]); }
 
@@ -154,9 +154,9 @@ else
    <div class="btn btn-primary btn-block mb-5">
      <span>open</span>
      <input type="file"  title='Click to add Files' />
-   </div>  <div style="padding: 20px; margin:10px; color:white;   border: solid 2px #666666;">
-           Datensatz wird aktezpiert: Wenn Daten in ALLEN Spalten [A][B][N][O][Q] vorhanden sind.
-      
+   </div>
+      <div style="padding: 20px; margin:10px; margin-left: 100px; color:white;   border: solid 2px #666666;">
+        Datensatz wird aktezpiert: Wenn Daten in ALLEN Spalten [A][B][N][O][Q] vorhanden sind.
    </div>
  </div> 
 <?php	

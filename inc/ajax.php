@@ -4,13 +4,13 @@ $post = $_POST;
 
 if( isset( $post['delete'] ) )
 { if( ( $post['delete'][0] == 'SSDELE' ) )  ## Slideshow BG PIC Header
-{ $ssid  = $post[ 'delete' ][ 1 ];
-  $sstxt = $post[ 'delete' ][ 2 ];
+  { $ssid  = $post[ 'delete' ][ 1 ];
+    $sstxt = $post[ 'delete' ][ 2 ];
   
-  $stmt = $db->prepare( 'DELETE FROM slidescreen WHERE id = ?' );
-  $stmt->bindValue( 1 , $ssid , SQLITE3_INTEGER );
-  $res = $stmt->execute();
-}
+    $stmt = $db->prepare( 'DELETE FROM slidescreen WHERE id = ?' );
+    $stmt->bindValue( 1 , $ssid , SQLITE3_INTEGER );
+    $res = $stmt->execute();
+  }
 }
 
 if( isset( $post['update'] ) )
@@ -55,7 +55,7 @@ if( isset( $post['update'] ) )
     $res = $stmt->execute();
   }
   
-  if( ( $post['update'][0] == 'SSDATE' ) )  ## Slideshow BG PIC Header
+  if( ( $post['update'][0] == 'SSEDATE' ) )  ## Slideshow BG PIC Header
   { $ssid  = $post[ 'update' ][ 1 ];
     $imgNr = $post[ 'update' ][ 2 ];
   
@@ -64,12 +64,21 @@ if( isset( $post['update'] ) )
     $stmt->bindValue( 2 , $ssid ,  SQLITE3_INTEGER );
     $res = $stmt->execute();
   }
+  
+  if( ( $post['update'][0] == 'SSSDATE' ) )  ## Slideshow BG PIC Header
+  { $ssid  = $post[ 'update' ][ 1 ];
+    $imgNr = $post[ 'update' ][ 2 ];
+    
+    $stmt = $db->prepare( 'UPDATE slidescreen SET start_on = ?  WHERE id = ?' );
+    $stmt->bindValue( 1 , $imgNr , SQLITE3_TEXT );
+    $stmt->bindValue( 2 , $ssid ,  SQLITE3_INTEGER );
+    $res = $stmt->execute();
+  }
 }
 
 
-if( isset( $post['load'] ) ) {
-  
-  if (($post['load'][0] == 'SSCONT'))  ## Slideshow BG PIC Header
+if( isset( $post['load'] ) )
+{ if (($post['load'][0] == 'SSCONT'))  ## Slideshow BG PIC Header
   {
     $ssid = $post['load'][1];
   

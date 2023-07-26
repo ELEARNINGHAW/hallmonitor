@@ -43,14 +43,12 @@ $(function(){
 
 
  function checkSSactive(id)
- {
-     const today = getToday();
-
+ {   const today = getToday();
      const dateE = $( "#ssedate"+ id  ).val();
      const dateS = $( "#sssdate"+ id  ).val();
+     const bg1   = "#FFFFFF";
+     const bg0   = "#BEBEBE";
 
-     const bg1 = "#FFFFFF";
-     const bg0 = "#BEBEBE";
      dSactive = true;
      dEactive = true;
      sSactive = true;
@@ -72,13 +70,11 @@ $(function(){
 
 
 function checkNTactive(id)
-{
-    const today = getToday();
+{   const today = getToday();
     const dateE = $( "#ntedate"+ id  ).val();
     const dateS = $( "#ntsdate"+ id  ).val();
-
-    const bg1 = "#FFFFFF";
-    const bg0 = "#BEBEBE";
+    const bg1   = "#FFFFFF";
+    const bg0   = "#BEBEBE";
     dSactive = true;
     dEactive = true;
     sSactive = true;
@@ -96,16 +92,42 @@ function checkNTactive(id)
     {$( "#ntline" + id ).css( "background-color", bg1 ); }
 }
 
-
-
-
-
 function getToday()
-{
-    var today = new Date();
+{   var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
     today = yyyy + '-' + mm + '-' + dd;
     return today;
+}
+
+
+
+function setNTBG(color, save= 1)
+{
+   $( "#bgBlueB"    ).css("border", "solid 5px white" )
+   $( "#bgRedB"     ).css("border", "solid 5px white" )
+   $( "#bgGreenB"   ).css("border", "solid 5px white" )
+   $( "#bgMagentaB" ).css("border", "solid 5px white" )
+
+  if(color == "blue")
+  {
+     if (save)$( "#result" ).load( "inc/ajax.php", {"update[]": ["NTBGCO", "blue"]} );
+     $( "#bgBlueB" ).css("border", "solid 5px black" )
+  }
+
+  if(color == "red")
+  { if (save) $( "#result" ).load( "inc/ajax.php", {"update[]": ["NTBGCO", "red"]} );
+    $( "#bgRedB" ).css("border", "solid 5px black" )
+  }
+  if(color == "green")
+  { if (save) $( "#result" ).load( "inc/ajax.php", {"update[]": ["NTBGCO", "green"]} );
+    $( "#bgGreenB" ).css("border", "solid 5px black" )
+  }
+  if(color == "magenta")
+  { if (save) $( "#result" ).load( "inc/ajax.php", {"update[]": ["NTBGCO", "magenta"]} );
+    $( "#bgMagentaB" ).css("border", "solid 5px black" )
+  }
+
+
 }

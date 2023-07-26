@@ -117,6 +117,17 @@ if( isset( $post['update'] ) )
   }
   
   
+  if( ( $post['update'][0] == 'NTBGCO' ) )  ## Slideshow BG PIC Header
+  {
+  #  $db = new SQLite3('../../db/html.db' );
+    $ntid  = $post[ 'update' ][ 1 ];
+    
+    $stmt = $db->prepare( 'UPDATE html SET value = ?  WHERE name = "ntbg"' );
+    $stmt->bindValue( 1 , $ntid , SQLITE3_TEXT );
+    $res = $stmt->execute();
+  }
+  
+  
   
   
   

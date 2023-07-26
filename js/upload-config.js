@@ -40,3 +40,72 @@ $(function(){
   onFallbackMode: function(){ ui_add_log('Plugin cant be used here, running Fallback callback', 'danger'); },
   onFileSizeError: function(file){ /* ui_add_log('File '' + file.name + '' cannot be added: size excess limit', 'danger');*/ } 
 }; 
+
+
+ function checkSSactive(id)
+ {
+     const today = getToday();
+
+     const dateE = $( "#ssedate"+ id  ).val();
+     const dateS = $( "#sssdate"+ id  ).val();
+
+     const bg1 = "#FFFFFF";
+     const bg0 = "#BEBEBE";
+     dSactive = true;
+     dEactive = true;
+     sSactive = true;
+
+     if( dateS <=  today ) { bgS = bg1; } else { bgS = bg0; dSactive = false; }
+     if( dateE >=  today ) { bgE = bg1; } else { bgE = bg0; dEactive = false; }
+     $( "#ssedate"+ id ).css("background-color", bgE ) ;
+     $( "#sssdate"+ id ).css("background-color", bgS ) ;
+
+     if (! $( "#ssactive" + id ).is( ":checked" ) ) { sSactive = false; }
+
+     if( (dSactive == false) || (dEactive == false) || (sSactive == false) )
+     {$( "#sslineX" + id ).css( "background-color", bg0 );}
+     else
+     {$( "#sslineX" + id ).css( "background-color", bg1 );}
+
+ }
+
+
+
+function checkNTactive(id)
+{
+    const today = getToday();
+    const dateE = $( "#ntedate"+ id  ).val();
+    const dateS = $( "#ntsdate"+ id  ).val();
+
+    const bg1 = "#FFFFFF";
+    const bg0 = "#BEBEBE";
+    dSactive = true;
+    dEactive = true;
+    sSactive = true;
+
+    if( dateS <=  today ) { bgS = bg1; } else { bgS = bg0; dSactive = false; }
+    if( dateE >=  today ) { bgE = bg1; } else { bgE = bg0; dEactive = false; }
+    $( "#ntedate"+ id ).css("background-color", bgE ) ;
+    $( "#ntsdate"+ id ).css("background-color", bgS ) ;
+
+    if (! $( "#ntactive" + id ).is( ":checked" ) ) { sSactive = false; }
+
+    if( (dSactive == false) || (dEactive == false) || (sSactive == false) )
+    {$( "#ntline" + id ).css( "background-color", bg0 ); }
+    else
+    {$( "#ntline" + id ).css( "background-color", bg1 ); }
+}
+
+
+
+
+
+function getToday()
+{
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    today = yyyy + '-' + mm + '-' + dd;
+    return today;
+}

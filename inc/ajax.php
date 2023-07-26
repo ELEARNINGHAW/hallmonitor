@@ -74,6 +74,52 @@ if( isset( $post['update'] ) )
     $stmt->bindValue( 2 , $ssid ,  SQLITE3_INTEGER );
     $res = $stmt->execute();
   }
+  
+  
+  if( ( $post[ 'update' ][ 0 ] == 'NTACTIV' ) )  ## Slideshow BG PIC Header
+  { $ntid  = $post[ 'update' ][ 1 ];
+    $imgNr = $post[ 'update' ][ 2 ];
+    
+    $stmt = $db->prepare( 'UPDATE newsticker SET active = ?  WHERE id = ?' );
+    $stmt->bindValue( 1 , $imgNr , SQLITE3_TEXT );
+    $stmt->bindValue( 2 , $ntid ,  SQLITE3_INTEGER );
+    $res = $stmt->execute();
+  }
+  
+  if( ( $post[ 'update' ][ 0 ] == 'NTTEXT' ) )  ## Slideshow BG PIC Header
+  { $ntid  = $post[ 'update' ][ 1 ];
+    $imgNr = $post[ 'update' ][ 2 ];
+    
+    $stmt = $db->prepare( 'UPDATE newsticker SET text = ?  WHERE id = ?' );
+    $stmt->bindValue( 1 , $imgNr , SQLITE3_TEXT );
+    $stmt->bindValue( 2 , $ntid ,  SQLITE3_INTEGER );
+    $res = $stmt->execute();
+  }
+  
+  if( ( $post[ 'update' ][ 0 ] == 'NTEDATE' ) )  ## Slideshow BG PIC Header
+  { $ntid  = $post[ 'update' ][ 1 ];
+    $imgNr = $post[ 'update' ][ 2 ];
+    
+    $stmt = $db->prepare( 'UPDATE newsticker SET best_before = ?  WHERE id = ?' );
+    $stmt->bindValue( 1 , $imgNr , SQLITE3_TEXT );
+    $stmt->bindValue( 2 , $ntid ,  SQLITE3_INTEGER );
+    $res = $stmt->execute();
+  }
+  
+  if( ( $post['update'][0] == 'NTSDATE' ) )  ## Slideshow BG PIC Header
+  { $ntid  = $post[ 'update' ][ 1 ];
+    $imgNr = $post[ 'update' ][ 2 ];
+    
+    $stmt = $db->prepare( 'UPDATE newsticker SET start_on = ?  WHERE id = ?' );
+    $stmt->bindValue( 1 , $imgNr , SQLITE3_TEXT );
+    $stmt->bindValue( 2 , $ntid ,  SQLITE3_INTEGER );
+    $res = $stmt->execute();
+  }
+  
+  
+  
+  
+  
 }
 
 

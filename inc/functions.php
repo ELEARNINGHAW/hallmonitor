@@ -62,14 +62,16 @@ function getHtmlData( $db )
 
 function actionHandler( $db )
 { $post = $_POST;
-  if( isset( $post['action'] ) )
-  { if ( $post['action'] == ' NEW ')
-    $ss ['best_before'] =  $datepreset =  date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d") + 7 , date("Y")));
-    $ss ['img'] = rand(1, 40);
+  if( isset( $post[ 'action' ] ) )
+  { if ( $post[ 'action' ] == ' NEW ')
+    $ss [ 'best_before' ] =  $datepreset =  date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d") + 7 , date("Y")));
+    $ss [ 'start_on'   ] =  $datepreset =  date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d")      , date("Y")));
+    $ss [ 'img' ] = rand( 1, 40 );
     
-    { $stmt = $db->prepare( 'INSERT INTO slidescreen (header, content, best_before, img , active )  VALUES ("" , "" , ? ,  ? , "true" )' );
+    { $stmt = $db->prepare( 'INSERT INTO slidescreen (header, content, best_before, img , active, start_on  )  VALUES ("" , "" , ? ,  ? , "true" ,  ? )' );
       $stmt->bindValue( 1 , $ss ['best_before'] , SQLITE3_TEXT );
       $stmt->bindValue( 2 , $ss ['img']         , SQLITE3_TEXT );
+      $stmt->bindValue( 3 , $ss ['start_on'   ] , SQLITE3_TEXT );
       $res = $stmt->execute();
     }
   }
@@ -82,22 +84,20 @@ function actionHandler( $db )
   }
   
   if( isset($_POST['nttext0'] ) AND  trim( $_POST['nttext0']) != '' )
-  { $nttext = $_POST['nttext0'];
-    $ntdate = $_POST['ntdate0'];
+  { $nttext  = $_POST[ 'nttext0'  ];
+    $ntsdate = $_POST[ 'ntsdate0' ];
+    $ntedate = $_POST[ 'ntedate0' ];
   
-    $stmt = $db->prepare( 'INSERT INTO newsticker (text, best_before, active ) VALUES ( ? , ? , "1" )' );
-    $stmt->bindValue( 1 , $nttext , SQLITE3_TEXT );
-    $stmt->bindValue( 2 , $ntdate , SQLITE3_TEXT );
+    $stmt = $db->prepare( 'INSERT INTO newsticker (text, best_before, active, start_on ) VALUES ( ? , ? , "1", ? )' );
+    $stmt->bindValue( 1 , $nttext  , SQLITE3_TEXT );
+    $stmt->bindValue( 2 , $ntedate , SQLITE3_TEXT );
+    $stmt->bindValue( 3 , $ntsdate , SQLITE3_TEXT );
     $res = $stmt->execute();
-   
-    $SQL    = 'INSERT INTO newsticker (text, best_before, active ) VALUES ("'.$nttext.'","'.$ntdate.'","1" )';
-    $db -> query( $SQL );
   }
   
   if( isset( $_POST['ntid']) )
   { $nt   = $_POST;
     $ntNr = $nt['ntid'];
-   # $SQL  = 'UPDATE newsticker SET ';
     
     if ( isset ( $nt[ 'nttext'   .$ntNr ] ) )
     { $stmt = $db->prepare( 'UPDATE newsticker SET text = ? WHERE id = ?' );
@@ -105,12 +105,20 @@ function actionHandler( $db )
       $stmt->bindValue( 2 , $ntNr                  , SQLITE3_TEXT );
       $res = $stmt->execute();
     }
-    if ( isset ( $nt[ 'ntdate'   .$ntNr ] ) )
-    { $stmt = $db->prepare( 'UPDATE newsticker SET best_before = ? WHERE id = ?' );
-      $stmt->bindValue( 1 , $nt[ 'ntdate'.$ntNr  ] , SQLITE3_TEXT );
-      $stmt->bindValue( 2 , $ntNr                  , SQLITE3_TEXT );
+    if ( isset ( $nt[ 'ntsdate'   .$ntNr ] ) )
+    { $stmt = $db->prepare( 'UPDATE newsticker SET start_on = ? WHERE id = ?' );
+      $stmt->bindValue( 1 , $nt[ 'ntsdate'.$ntNr  ] , SQLITE3_TEXT );
+      $stmt->bindValue( 2 , $ntNr                   , SQLITE3_TEXT );
       $res = $stmt->execute();
     }
+  
+    if ( isset ( $nt[ 'ntedate'   .$ntNr ] ) )
+    { $stmt = $db->prepare( 'UPDATE newsticker SET best_before = ? WHERE id = ?' );
+      $stmt->bindValue( 1 , $nt[ 'ntedate'.$ntNr  ] , SQLITE3_TEXT );
+      $stmt->bindValue( 2 , $ntNr                   , SQLITE3_TEXT );
+      $res = $stmt->execute();
+    }
+
     if ( isset ( $nt[ 'ntactive' .$ntNr ] ) )
     { $stmt = $db->prepare( 'UPDATE newsticker SET active = 1 WHERE id = ?' );
       $stmt->bindValue( 1 , $ntNr                  , SQLITE3_TEXT );
@@ -135,39 +143,58 @@ function getNewstickerEditor($db)
   $newsticker  = getNewstickerData( $db, true );
   if( isset ( $newsticker ) )
   foreach ( $newsticker as $nt )
-  { if( $nt[ 'active' ]  == 1 ) { $chk = 'checked'; $bgc = '#FFFFFF'; } else { $chk = ''; $bgc = '#BEBEBE'; }
-    $chk = ''; if($nt['active']) {$chk = 'checked'; }
-    $html .= '<div class="ntline" id="netline'   .$nt[ 'id' ]. '" style="background-color: '.$bgc.';"  >'."\n";
-    $html .=  '<form action="editor.php" method="post" id = "ntform' .$nt[ 'id' ]. '">';
-    $html .=  '<span> <input type="text"      class="nttext"   name="nttext'   .$nt[ 'id' ]. '" id="nttext'   .$nt[ 'id' ]. '" value="'.       $nt[ 'text'        ].'" ></span>'."\n";
-    $html .=  '<span> <input type="date"      class="ntdate"   name="ntsdate'  .$nt[ 'id' ]. '" id="ntsdate'  .$nt[ 'id' ]. '" value="'.       $nt[ 'start_on'    ].'" ></span> '."\n";
-    $html .=  '<span> <input type="date"      class="ntdate"   name="ntdate'   .$nt[ 'id' ]. '" id="ntdate'   .$nt[ 'id' ]. '" value="'.       $nt[ 'best_before' ].'" ></span> '."\n";
-    $html .=  '<span> <input type="checkbox"  class="ntactive" name="ntactive' .$nt[ 'id' ]. '" id="ntactive' .$nt[ 'id' ]. '" value="active'. $nt[ 'id'          ].'" ' .$chk. ' ></span>'."\n";
-    $html .=  '<span> <input type="hidden"    class="ntid"     name="ntid"                      id="ntid'     .$nt[ 'id' ]. '" value="'.       $nt[ 'id'          ].'" ></span>'."\n";
-    $html .=  '<span> <input type="submit"    class="ntdel"    name="ntdel"                     id="ntdel'    .$nt[ 'id' ]. '" value=" DEL " ></span>'."\n";
-    $html .=  '</form>'."\n";
-    $html .=  '</div>'."\n";
+  {
+   # if( $nt[ 'active' ]  == 1 ) { $chk = 'checked';  } else { $chk = ''; }
+   # $chk = ''; if($nt['active']) {$chk = 'checked'; }
+    $html .= "\n" . '<div class="ntline" id="ntline'   .$nt[ 'id' ]. '" >'."\n";
+    $html .= "\n" . '<form action="editor.php" method="post" id = "ntform' .$nt[ 'id' ]. '">';
+    $html .= "\n" . '<span> <input type="text"      class="nttext"   name="nttext'   .$nt[ 'id' ]. '" id="nttext'   .$nt[ 'id' ]. '" value="'.       $nt[ 'text'        ].'" ></span>'."\n";
+    $html .= "\n" . '<span> <input type="date"      class="ntdate"   name="ntsdate'  .$nt[ 'id' ]. '" id="ntsdate'  .$nt[ 'id' ]. '" value="'.       $nt[ 'start_on'    ].'" ></span> '."\n";
+    $html .= "\n" . '<span> <input type="date"      class="ntdate"   name="ntedate'  .$nt[ 'id' ]. '" id="ntedate'  .$nt[ 'id' ]. '" value="'.       $nt[ 'best_before' ].'" ></span> '."\n";
   
-    $html .=  '<script>';
-    $html .=  "\n"."$( '#ntactive" .$nt[ 'id' ]. "' ).change( function()  { if( this.checked )  {  $('#netline" .$nt[ 'id' ]. "').css('background-color', 'red');  }  else{ $('#netline".$nt[ 'id' ]. "').css('background-color', 'blue'); }  $('#ntform" .$nt[ 'id' ]. "').submit(); });";
-    $html .=  "\n"."$( '#nttext"   .$nt[ 'id' ]. "' ).change( function()  {  $('#ntform" .$nt[ 'id' ]. "').submit(); } );";
-    $html .=  "\n"."$( '#ntdate"   .$nt[ 'id' ]. "' ).change( function()  {  $('#ntform" .$nt[ 'id' ]. "').submit(); } );";
+    if( $nt[ 'active'] == true ) { $chk = 'checked';  } else { $chk = ''; }
+    $html .= "\n" . ' <input type = "checkbox" class = "ntactive"  name ="ntactive" id = "ntactive'  .$nt[ 'id' ]. '" value="active" ' .$chk. ' >';
+
+#    $html .= "\n" . '<span> <input type="checkbox"  class="ntactive" name="ntactive' .$nt[ 'id' ]. '" id="ntactive' .$nt[ 'id' ]. '" value="active'. $nt[ 'id'          ].'" ' .$chk. ' ></span>'."\n";
+    $html .= "\n" .'<span> <input type="hidden"    class="ntid"     name="ntid"                      id="ntid'     .$nt[ 'id' ]. '" value="'.       $nt[ 'id'          ].'" ></span>'."\n";
+    $html .= "\n" .'<span> <input type="submit"    class="ntdel"    name="ntdel"                     id="ntdel'    .$nt[ 'id' ]. '" value=" DEL " ></span>'."\n";
+    $html .= "\n" .'</form>'."\n";
+    $html .= "\n" .'</div>'."\n";
   
-    $html .=  "\n"."var TodayDate = new Date();";
-    $html .=  "\n".'var date = new Date( $("#ntdate' .$nt[ 'id' ]. '" ).val() ); ';
-    $html .=  "\n".' if (date >= TodayDate) { bgc = "#FFFFFF";  } else { bgc = "#FF0000";  };';
-    $html .=  "\n".' $( "#ntdate' .$nt[ 'id' ]. '").css("background-color", bgc ) ;'  ;
+    $html .= "\n" .'<script>';
   
+    $html .=  "$( '#ntactive" .$nt[ 'id' ]. "' ).change( function()";
+    $html .=  "{";
+    $html .=  "\n".' $( "#result" ).load( "inc/ajax.php", { "update[]": ["NTACTIV", ' .$nt[ 'id' ]. ',  $("#ntactive' .$nt[ 'id' ]. '" ).prop("checked") ] });';
+    $html .=  "\n"."  checkNTactive(" .$nt[ 'id' ]. ")";
+    $html .=  "});";
+    
+    $html .=  "\n"."$( '#nttext"   .$nt[ 'id' ]. "' ).change( function()  { ";
+    $html .=  "\n".' $( "#result" ).load( "inc/ajax.php", { "update[]": ["NTTEXT", ' .$nt[ 'id' ]. ', $("#nttext' .$nt[ 'id' ]. '" ).val() ] });  ';
+    $html .=  "} );";
+ 
+    $html .=  "\n"."$( '#ntsdate"      .$nt[ 'id' ]. "' ).change( function() { ";
+    $html .=  "\n".' $( "#result" ).load( "inc/ajax.php", { "update[]": ["NTSDATE", ' .$nt[ 'id' ]. ', $("#ntsdate' .$nt[ 'id' ]. '" ).val() ] });   checkNTactive('.$nt[ 'id' ].'); ';
+    $html .=  "} );";
+  
+    $html .=  "\n"."$( '#ntedate"      .$nt[ 'id' ]. "' ).change( function() { ";
+    $html .=  "\n".'  $( "#result" ).load( "inc/ajax.php", { "update[]": ["NTEDATE", ' .$nt[ 'id' ]. ', $("#ntedate' .$nt[ 'id' ]. '" ).val()   ] });   checkNTactive('.$nt[ 'id' ].'); ';
+    $html .=  "} );";
+
+    $html .=  "checkNTactive(" .$nt[ 'id' ]. ");";
+    
     $html .=  '</script>';
   }
   $nt[ 'id' ] = 0;
 
-  $datepreset =  date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d") + 7 , date("Y")));
+  $dateE =  date("Y-m-d", mktime(0, 0, 0, date("m")  ,date("d") + 7 , date("Y")));
+  $dateS =  date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d")  , date("Y")));
   
-  $html .=  '<div class="ntline" id="netline'   .$nt[ 'id' ]. '" >'."\n";
+  $html .=  '<div class="ntline" id="ntline'   .$nt[ 'id' ]. '" >'."\n";
   $html .=  '<form action="editor.php" method="post">';
   $html .=  '<span> <input type="text"      class="nttext"   name="nttext'   .$nt[ 'id' ]. '" id="nttext'   .$nt[ 'id' ]. '" value=" " ></span>'."\n";
-  $html .=  '<span> <input type="date"      class="ntdate"   name="ntdate'   .$nt[ 'id' ]. '" id="ntdate'   .$nt[ 'id' ]. '" value="'. $datepreset.'" ></span> '."\n";
+  $html .=  '<span> <input type="date"      class="ntdate"   name="ntsdate'  .$nt[ 'id' ]. '" id="ntsdate'  .$nt[ 'id' ]. '" value="'. $dateS.'" ></span> '."\n";
+  $html .=  '<span> <input type="date"      class="ntdate"   name="ntedate'  .$nt[ 'id' ]. '" id="ntedate'  .$nt[ 'id' ]. '" value="'. $dateE.'" ></span> '."\n";
   $html .=  '<span> <input type="hidden"    class="ntupd"    name="ntupd'                . '" id="ntupd'    .$nt[ 'id' ]. '" value=" " ></span>'."\n";
   $html .=  '<span> <input type="submit"    class="ntsub"    name="ntsub'    .$nt[ 'id' ]. '" id="ntsub'    .$nt[ 'id' ]. '" value=" NEU " ></span>'."\n";
   $html .=  '</form>'."\n";
@@ -244,16 +271,9 @@ function getScreenslideData( $html, $screen, $today, $screenslide )
 
 function getScreenSlideRow($ss)
 {
-# deb($ss);
-#$ss ['id']
-#$ss['header']
-#$ss['content']
-#$ss ['best_before']
-#$ss ['img']
-#$ss['active']
-if( $ss[ 'active'] == "true" ) { $chk = 'checked'; $bgc = '#FFFFFF'; } else { $chk = ''; $bgc = '#BEBEBE'; }
- 
-$html  =  "\n" . '<div                           class = "ssline" id="sslineX' .$ss[ 'id' ]. '" style="background-color:' .$bgc. '"  > ';
+
+
+$html  =  "\n" . '<div                           class = "ssline" id="sslineX' .$ss[ 'id' ]. '"  > ';
 $html .=  "\n" . '<div                           class = "ssline2" > <div   name ="ssheader_'  .$ss[ 'id' ]. '"  id = "ssheader__'  .$ss[ 'id' ]. '" class = "ssheader_" >'        .$ss[ 'header'  ]. '</div></div> ';
 $html .=  "\n" . '<div                           class = "ssline2" > <input name ="ssspinner'  .$ss[ 'id' ]. '"  id = "ssspinner_'  .$ss[ 'id' ]. '" class = "ssspinner" value="'  .$ss[ 'img'     ]. '"></div>          ';
 $html .=  "\n" . '<div                           class = "ssline2" > <div   name ="sscontent'  .$ss[ 'id' ]. '"  id = "sscontent_'  .$ss[ 'id' ]. '" class = "sscontent" >'        .$ss[ 'content' ]. '</div></div><div> ';
@@ -261,6 +281,7 @@ $html .=  "\n" . '<div                           class = "ssline2" > <div   name
 $html .=  "\n" . '<div                      class = "ssline2"   id = "ssblockC'    .$ss[ 'id' ]. '">';
 $html .=  "\n" . ' <input type = "date"     class = "ssdate"    name ="sssdate"  id = "sssdate'   .$ss[ 'id' ]. '" value="'         .$ss[ 'start_on'    ]. '" ><br>';
 $html .=  "\n" . ' <input type = "date"     class = "ssdate"    name ="ssedate"  id = "ssedate'   .$ss[ 'id' ]. '" value="'         .$ss[ 'best_before' ]. '" ><br>';
+if( $ss[ 'active'] == "true" ) { $chk = 'checked';  } else { $chk = ''; }
 $html .=  "\n" . ' <input type = "checkbox" class = "ssactive"  name ="ssactive" id = "ssactive'  .$ss[ 'id' ]. '" value="active" ' .$chk. ' ><br>';
 
 $html .=  "\n" . '<div id="drag-and-drop-zone' .$ss[ 'id' ]. '" class="dm-uploader">';
@@ -268,7 +289,7 @@ $html .=  "\n" . '<h3 class="mb-51 text-muted">PDF<br/>JGP<br/>PNG</h3> ';
 $html .=  "\n" . '<div class="btn btn-primary btn-block mb-5"> ';
 $html .=  "\n" . '<span>open</span> ';
 $html .=  "\n" . '<input type="file"  title="Click to add Files" /> ';
-$html .=  "\n" . '<input type="hidden" id="x38" name="ssid" value="'.$ss[ 'id' ].'" /> ';
+$html .=  "\n" . '<input type="hidden" id="x'.$ss[ 'id' ].'" name="ssid" value="'.$ss[ 'id' ].'" /> ';
 $html .=  "\n" . '</div></div> ';
 $html .=  "\n" . ' ';
 
@@ -278,6 +299,7 @@ $html .=  "\n" . '</div>';
 $html .=  "\n" . '</div>';
 
 $html .=  "\n".'<script>';
+
 $html .=  "\n".' $( "#ssspinner_'  .$ss[ 'id' ]. '" ).spinner(';
 $html .=  "\n".' { ';
 $html .=  "\n".' min:0, ';
@@ -311,7 +333,6 @@ $html .=  "\n".' });';
 $html .=  '}';
 $html .=  '}); ';
 
-
 $html .=  "\n".' tinymce.init({';
 $html .=  "\n".' selector: "#sscontent_'  .$ss[ 'id' ]. '",';
 $html .=  "\n".' menubar: false,';
@@ -319,25 +340,18 @@ $html .=  "\n".' inline: true,';
 $html .=  "\n".' paste_as_text: true,';
 $html .=  "\n".' toolbar: "undo redo | bold italic underline | code",';
 $html .=  "\n".' content_css: "css/minicontent.css", ';
-
 $html .=  "\n"." plugins: [";
 $html .=  "\n"."'advlist autolink lists link image charmap print preview anchor',";
 $html .=  "\n"." 'searchreplace visualblocks code fullscreen',";
 $html .=  "\n"." 'insertdatetime media table paste wordcount'";
 $html .=  "\n"."],";
-$html .=  "\n"."toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat code ',";
-#  $html .=  "\n"."  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'";
-$html .=  "\n"."";
-$html .=  "\n"."";
-$html .=  "\n"."";
-
+$html .=  "\n"." toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat code ',";
 $html .=  "\n".' setup: (editor) => ';
 $html .=  "\n".' { editor.on("focusOut", () => ';
 $html .=  "\n".' { console.log(  $("#sscontent_' .$ss[ 'id' ]. '" ).html()  );  ';
 $html .=  "\n".' $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSCONT", ' .$ss[ 'id' ]. ',  $("#sscontent_' .$ss[ 'id' ]. '" ).html()] } );';
 $html .=  "\n".' });}}); ';
 $html .=  "\n".'';
-$html .=  '';
 $html .=  '';
 $html .=  ' function success(){ ;} ';
 $html .=  '';
@@ -348,23 +362,16 @@ $html .=  "\n".'$( "#ssheader__' .$ss[ 'id' ]. '" ).css( "background-image" , "u
 $html .=  "$( '#ssactive" .$ss[ 'id' ]. "' ).change( function()";
 $html .=  '{';
 $html .=  "\n".' $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSACTIV", ' .$ss[ 'id' ]. ',  $("#ssactive' .$ss[ 'id' ]. '" ).prop("checked") ] });';
-$html .=  "\n".' if ($("#ssactive' .$ss[ 'id' ]. '" ).is(":checked")) { bgc = "#FFFFFF";  } else { bgc = "#BEBEBE";  };'  ;
-$html .=  "\n".' $( "#sslineX' .$ss[ 'id' ]. '").css("background-color", bgc ) ;'  ;
+$html .=  "\n"."  checkSSactive(" .$ss[ 'id' ]. ")";
 $html .=  '});';
 
 $html .=  "\n"."$( '#ssedate"      .$ss[ 'id' ]. "' ).change( function() ";
-$html .=  "\n".'{ $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSEDATE", ' .$ss[ 'id' ]. ',  $("#ssedate' .$ss[ 'id' ]. '" ).val()] })}';
+$html .=  "\n".'{  $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSEDATE", ' .$ss[ 'id' ]. ', $("#ssedate' .$ss[ 'id' ]. '" ).val()   ] });   checkSSactive('.$ss[ 'id' ].'); }';
 $html .=  ");";
 
 $html .=  "\n"."$( '#sssdate"      .$ss[ 'id' ]. "' ).change( function() ";
-$html .=  "\n".'{ $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSSDATE", ' .$ss[ 'id' ]. ',  $("#sssdate' .$ss[ 'id' ]. '" ).val()] })}';
+$html .=  "\n".'{ $( "#result" ).load( "inc/ajax.php", { "update[]": ["SSSDATE", ' .$ss[ 'id' ]. ', $("#sssdate' .$ss[ 'id' ]. '" ).val() ] });   checkSSactive('.$ss[ 'id' ].'); }';
 $html .=  ");";
-
-
-$html .=  "\n"."var TodayDate = new Date();";
-$html .=  "\n".'var date = new Date( $("#ssdate' .$ss[ 'id' ]. '" ).val() ); ';
-$html .=  "\n".' if (date >= TodayDate) { bgc = "#FFFFFF";  } else { bgc = "#FF0000";  };';
-$html .=  "\n".' $( "#ssdate' .$ss[ 'id' ]. '").css("background-color", bgc ) ;'  ;
 
 $html .=  "$( '#ssdel"      .$ss[ 'id' ]. "' ).click( function() ";
 $html .=  "\n".'{ $( "#result" ).load( "inc/ajax.php", { "delete[]": ["SSDELE", ' .$ss[ 'id' ]. ',  $("#ssdel' .$ss[ 'id' ]. '" ).val()] }) ; $("#sslineX' .$ss[ 'id' ]. '" ).remove()   }';
@@ -399,8 +406,6 @@ $html .=  "\n"." {
     ui_multi_update_file_status(id, 'success', 'Upload Complete');
     ui_multi_update_file_progress(id, 100, 'success', false);
     $( '#sscontent_" .$ss[ 'id' ]. "' ).load( 'inc/ajax.php', { 'load[]': ['SSCONT', " .$ss[ 'id' ]. " ] })
-
-    
   },
   onUploadError: function(id, xhr, status, message)
   { ui_multi_update_file_status(id, 'danger', message);
@@ -411,6 +416,8 @@ $html .=  "\n"." {
 }
 ";
 $html .=  "\n".");";
+
+$html .=  "\n"."  checkSSactive(" .$ss[ 'id' ]. ")";
 $html .=  '</script>';
 return $html;
 }

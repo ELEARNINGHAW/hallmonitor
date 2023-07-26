@@ -79,9 +79,9 @@ if( isset( $post['update'] ) )
   if( ( $post[ 'update' ][ 0 ] == 'NTACTIV' ) )  ## Slideshow BG PIC Header
   { $ntid  = $post[ 'update' ][ 1 ];
     $imgNr = $post[ 'update' ][ 2 ];
-    
+    #print_r($post);
     $stmt = $db->prepare( 'UPDATE newsticker SET active = ?  WHERE id = ?' );
-    $stmt->bindValue( 1 , $imgNr , SQLITE3_TEXT );
+    $stmt->bindValue( 1 , "$imgNr" , SQLITE3_TEXT );
     $stmt->bindValue( 2 , $ntid ,  SQLITE3_INTEGER );
     $res = $stmt->execute();
   }

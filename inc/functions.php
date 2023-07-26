@@ -46,15 +46,18 @@ $newsticker = null;
   else
   { $html[ 'newsticker' ][ 'html'    ] = "<div id =\"nticker\" class=\"news ".$currNTbg."\"><span id =\"nttag\">News</span><ul>";
     $html[ 'newsticker' ][ 'payload' ]= false;
-    $html[ 'newsticker' ][ 'html'    ] .= getTickerCSS( sizeof( $newsticker ) );
-  
+    
+    
     if( isset( $newsticker ) )
-    foreach ( $newsticker as $nt )
     {
-    { $html[ 'newsticker' ][ 'html'    ] .= '<li><a href="#">+++ ' . $nt['text'] . ' +++ </a></li>';
-      $html[ 'newsticker' ][ 'payload' ] = true;
-    }
-  }
+      $html[ 'newsticker' ][ 'html'    ] .= getTickerCSS( sizeof( $newsticker ) );
+      foreach ( $newsticker as $nt )
+      {
+        { $html[ 'newsticker' ][ 'html'    ] .= '<li><a href="#">+++ ' . $nt['text'] . ' +++ </a></li>';
+          $html[ 'newsticker' ][ 'payload' ] = true;
+        }
+       }
+     }
   $html[ 'newsticker' ][ 'html' ] .= <<<EOD
 </ul>
 </div>
@@ -189,7 +192,7 @@ function getNewstickerEditor($db)
     $html .= "\n" . '<span> <input type="date"      class="ntdate"   name="ntsdate'  .$nt[ 'id' ]. '" id="ntsdate'  .$nt[ 'id' ]. '" value="'.       $nt[ 'start_on'    ].'" ></span> '."\n";
     $html .= "\n" . '<span> <input type="date"      class="ntdate"   name="ntedate'  .$nt[ 'id' ]. '" id="ntedate'  .$nt[ 'id' ]. '" value="'.       $nt[ 'best_before' ].'" ></span> '."\n";
   
-    if( $nt[ 'active'] == true ) { $chk = 'checked';  } else { $chk = ''; }
+    if( $nt[ 'active'] == "true" ) { $chk = 'checked';  } else { $chk = ''; }
     $html .= "\n" . ' <input type = "checkbox" class = "ntactive"  name ="ntactive" id = "ntactive'  .$nt[ 'id' ]. '" value="active" ' .$chk. ' >';
     $html .= "\n" .'<span> <input type="hidden"    class="ntid"     name="ntid"                      id="ntid'     .$nt[ 'id' ]. '" value="'.       $nt[ 'id'          ].'" ></span>'."\n";
     $html .= "\n" .'<span> <input type="submit"    class="ntdel"    name="ntdel"                     id="ntdel'    .$nt[ 'id' ]. '" value=" DEL " ></span>'."\n";

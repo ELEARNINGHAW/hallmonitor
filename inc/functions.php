@@ -52,8 +52,7 @@ $newsticker = null;
     {
       $html[ 'newsticker' ][ 'html'    ] .= getTickerCSS( sizeof( $newsticker ) );
       foreach ( $newsticker as $nt )
-      {
-        { $html[ 'newsticker' ][ 'html'    ] .= '<li><a href="#">+++ ' . $nt['text'] . ' +++ </a></li>';
+      { { $html[ 'newsticker' ][ 'html'    ] .= '<li><a href="#">+++ ' . $nt['text'] . ' +++ </a></li>';
           $html[ 'newsticker' ][ 'payload' ] = true;
         }
        }
@@ -365,9 +364,9 @@ $html .=  "\n".' paste_as_text: true,';
 $html .=  "\n"." plugins: [";
 $html .=  "\n"."'advlist autolink lists link image charmap print preview anchor',";
 $html .=  "\n"." 'searchreplace visualblocks code fullscreen',";
-$html .=  "\n"." 'insertdatetime media table paste wordcount'";
+$html .=  "\n"." 'insertdatetime media table paste wordcount textcolor'";
 $html .=  "\n"."],";
-$html .=  "\n".'toolbar: "undo redo | bold italic underline",';
+$html .=  "\n".'toolbar: "forecolor backcolor undo  redo | bold italic underline    ",';
 $html .=  "\n".'content_css: "css/minicontent.css", ';
 $html .=  "\n".'setup: (editor) => ';
 $html .=  "\n".'{ editor.on("focusOut", () => ';
@@ -388,9 +387,9 @@ $html .=  "\n".' content_css: "css/minicontent.css", ';
 $html .=  "\n"." plugins: [";
 $html .=  "\n"."'advlist autolink lists link image charmap print preview anchor',";
 $html .=  "\n"." 'searchreplace visualblocks code fullscreen',";
-$html .=  "\n"." 'insertdatetime media table paste wordcount'";
+$html .=  "\n"." 'insertdatetime media table paste wordcount textcolor'";
 $html .=  "\n"."],";
-$html .=  "\n"." toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat code ',";
+$html .=  "\n"." toolbar: 'backcolor forecolor | undo redo | formatselect | bold italic  |  alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat code ',";
 $html .=  "\n".' setup: (editor) => ';
 $html .=  "\n".' { editor.on("focusOut", () => ';
 $html .=  "\n".' { console.log(  $("#sscontent_' .$ss[ 'id' ]. '" ).html()  );  ';

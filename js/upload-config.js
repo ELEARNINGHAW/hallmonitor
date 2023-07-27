@@ -1,12 +1,11 @@
-$(function(){
-  $('#drag-and-drop-zone').dmUploader(
+$(function()
+{ $('#drag-and-drop-zone').dmUploader(
       dndini
   );
 });
 
- var dndini = {
- 
- url: 'backend/upload.php',
+ var dndini =
+{ url: 'backend/upload.php',
  extFilter: [ 'jpg', 'pdf', 'png', 'gif' ],
  maxFileSize: 3000000, 
  onDragEnter: function(){ this.addClass('active');    },    
@@ -42,7 +41,7 @@ $(function(){
 }; 
 
 
- function checkSSactive(id)
+function checkSSactive(id)
  {   const today = getToday();
      const dateE = $( "#ssedate"+ id  ).val();
      const dateS = $( "#sssdate"+ id  ).val();
@@ -64,9 +63,7 @@ $(function(){
      {$( "#sslineX" + id ).css( "background-color", bg0 );}
      else
      {$( "#sslineX" + id ).css( "background-color", bg1 );}
-
  }
-
 
 
 function checkNTactive(id)
@@ -91,17 +88,6 @@ function checkNTactive(id)
     else
     {$( "#ntline" + id ).css( "background-color", bg1 ); }
 }
-
-function getToday()
-{   var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-    var yyyy = today.getFullYear();
-    today = yyyy + '-' + mm + '-' + dd;
-    return today;
-}
-
-
 
 function setNTBG(color, save= 1)
 {
@@ -128,6 +114,13 @@ function setNTBG(color, save= 1)
   { if (save) $( "#result" ).load( "inc/ajax.php", {"update[]": ["NTBGCO", "magenta"]} );
     $( "#bgMagentaB" ).css("border", "solid 5px black" )
   }
+}
 
-
+function getToday()
+{   var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    today = yyyy + '-' + mm + '-' + dd;
+    return today;
 }

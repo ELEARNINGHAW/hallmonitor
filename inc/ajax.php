@@ -75,7 +75,6 @@ if( isset( $post['update'] ) )
     $res = $stmt->execute();
   }
   
-  
   if( ( $post[ 'update' ][ 0 ] == 'NTACTIV' ) )  ## Slideshow BG PIC Header
   { $ntid  = $post[ 'update' ][ 1 ];
     $imgNr = $post[ 'update' ][ 2 ];
@@ -116,28 +115,19 @@ if( isset( $post['update'] ) )
     $res = $stmt->execute();
   }
   
-  
   if( ( $post['update'][0] == 'NTBGCO' ) )  ## Slideshow BG PIC Header
-  {
-  #  $db = new SQLite3('../../db/html.db' );
-    $ntid  = $post[ 'update' ][ 1 ];
+  { $ntid  = $post[ 'update' ][ 1 ];
     
     $stmt = $db->prepare( 'UPDATE html SET value = ?  WHERE name = "ntbg"' );
     $stmt->bindValue( 1 , $ntid , SQLITE3_TEXT );
     $res = $stmt->execute();
   }
-  
-  
-  
-  
-  
 }
 
 
 if( isset( $post['load'] ) )
 { if (($post['load'][0] == 'SSCONT'))  ## Slideshow BG PIC Header
-  {
-    $ssid = $post['load'][1];
+  { $ssid = $post['load'][1];
   
     $stmt = $db->prepare( 'SELECT content from slidescreen WHERE id = ?' );
     $stmt->bindValue( 1 , $ssid , SQLITE3_INTEGER );

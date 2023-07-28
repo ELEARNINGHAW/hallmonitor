@@ -366,7 +366,7 @@ $html .=  "\n"."'advlist autolink lists link image charmap print preview anchor'
 $html .=  "\n"." 'searchreplace visualblocks code fullscreen',";
 $html .=  "\n"." 'insertdatetime media table paste wordcount textcolor'";
 $html .=  "\n"."],";
-$html .=  "\n".'toolbar: "forecolor backcolor undo  redo | bold italic underline    ",';
+$html .=  "\n".'toolbar: "forecolor backcolor undo  redo | bold italic underline  code   ",';
 $html .=  "\n".'content_css: "css/minicontent.css", ';
 $html .=  "\n".'setup: (editor) => ';
 $html .=  "\n".'{ editor.on("focusOut", () => ';
@@ -575,10 +575,11 @@ $html['editorhead'] = <<<EOD
 <script src="js/upload-ui.js"></script>
 <script src="js/upload-config.js"></script>
 
-<link href="css/bootstrap.min.css" rel="stylesheet">
-<link href="css/jquery.dm-uploader.min.css" rel="stylesheet">
-<link href="css/upload-styles.css" rel="stylesheet">
+<link href = "css/bootstrap.min.css"                 rel="stylesheet">
+<link href = "css/jquery.dm-uploader.min.css"        rel="stylesheet">
+<link href = "css/upload-styles.css"                 rel="stylesheet">
 <link href = "js/jquery-ui-1.13.2/jquery-ui.min.css" rel="stylesheet" >
+<link href = "css/common.min.css"                    rel="stylesheet"  type="text/css" >
 
 <style>
   .ssline, .ntline{  border: solid 1px black; margin: 2px; padding: 5px; }

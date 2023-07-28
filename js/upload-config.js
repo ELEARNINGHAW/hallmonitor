@@ -91,28 +91,28 @@ function checkNTactive(id)
 
 function setNTBG(color, save= 1)
 {
-   $( "#bgBlueB"    ).css("border", "solid 5px white" )
-   $( "#bgRedB"     ).css("border", "solid 5px white" )
-   $( "#bgGreenB"   ).css("border", "solid 5px white" )
-   $( "#bgMagentaB" ).css("border", "solid 5px white" )
+   $( "#bgBlueB"    ).css("border", "solid 5px black" )
+   $( "#bgRedB"     ).css("border", "solid 5px black" )
+   $( "#bgGreenB"   ).css("border", "solid 5px black" )
+   $( "#bgMagentaB" ).css("border", "solid 5px black" )
 
   if(color == "blue")
   {
      if (save)$( "#result" ).load( "inc/ajax.php", {"update[]": ["NTBGCO", "blue"]} );
-     $( "#bgBlueB" ).css("border", "solid 5px black" )
+     $( "#bgBlueB" ).css("border", "solid 5px white" )
   }
 
   if(color == "red")
   { if (save) $( "#result" ).load( "inc/ajax.php", {"update[]": ["NTBGCO", "red"]} );
-    $( "#bgRedB" ).css("border", "solid 5px black" )
+    $( "#bgRedB" ).css("border", "solid 5px white" )
   }
   if(color == "green")
   { if (save) $( "#result" ).load( "inc/ajax.php", {"update[]": ["NTBGCO", "green"]} );
-    $( "#bgGreenB" ).css("border", "solid 5px black" )
+    $( "#bgGreenB" ).css("border", "solid 5px white" )
   }
   if(color == "magenta")
   { if (save) $( "#result" ).load( "inc/ajax.php", {"update[]": ["NTBGCO", "magenta"]} );
-    $( "#bgMagentaB" ).css("border", "solid 5px black" )
+    $( "#bgMagentaB" ).css("border", "solid 5px white" )
   }
 }
 

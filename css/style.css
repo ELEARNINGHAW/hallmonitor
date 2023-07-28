@@ -52,7 +52,7 @@ height: 55px;
   max-width: 150px;
   
   text-decoration: none;
-  font: 34px 'Raleway',Helvetica, Arial, sans-serif;
+  font: 34px "Raleway",Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -webkit-user-select: none
 }
@@ -73,10 +73,17 @@ height: 55px;
 .mobg2 { background: #333333;  opacity: 0.4; z-index: 100;
 }
 
-.mo { color: #FFFFFF; padding: 0px; cursor: default; font-family: 'Oxygen';
+.mo { color: #FFFFFF; padding: 0px; cursor: default; font-family: "Oxygen";
   text-outline: 15px 15px #000000;
   text-shadow: #000 2px 2px 5px;
   -webkit-font-smoothing: antialiased
+}
+
+.mo p span, .mo a p span  {
+ padding:20px;
+ padding-bottom:5px;
+ padding-top:5px;
+
 }
 
 .mo a {     color: #FFFFFF;  cursor: pointer;  z-index: 200;

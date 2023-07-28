@@ -58,7 +58,7 @@ $newsticker = null;
        }
      }
   $html[ 'newsticker' ][ 'html' ] .= <<<EOD
-</ul>
+</ul> <img src="img/logohawtrans.png" style="height: 50px; margin-top: 2px; margin-right: 3px; float: right;">
 </div>
 EOD;
   

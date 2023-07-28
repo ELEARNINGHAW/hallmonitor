@@ -2,7 +2,8 @@ div.ssline2 div.ssheader_ p {
     color: #FFFFFF;
     padding: 50px;
     cursor: pointer;
-    font-family: Georgia, serif;
+  font-family: 'Oxygen';
+  text-shadow: #000 2px 2px 5px;
     font-size: 28px;
    text-align: center;
    line-height: normal;

@@ -353,13 +353,23 @@ function getScreenslideData( $html, $screen, $today, $screenslide )
 
 function getScreenContent( $html, $sc )
 {
+
+    $url = (isset($_SERVER['HTTPS']) ? 'https' : 'http')
+        . '://'
+        . $_SERVER['HTTP_HOST']
+        . $_SERVER['REQUEST_URI'];
+
     $html[ 'hasContent' ] = true;
 
     $c =  strip_tags(  $sc['content'] );
+    if(!empty($c)){
+        $sc['header'] =   dirname($url) . '/backend/files/'.$c;;
+    }
+
     $h = (filter_var( strip_tags(  $sc['header'])   , FILTER_VALIDATE_URL) );
 
     if ($h)
-    { $html['screenslide'] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse" style="padding-top: 0px;"><iframe width="1920" height="1100"  allowfullscreen = "true" referrerpolicy="unsafe-url"    src="' . $h . '"></iframe></div>' . "\n"; }
+    { $html['screenslide'] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse" style="padding-top: 0px;"><iframe style="display: block;   margin: auto;" width="1920" height="1100"  allowfullscreen = "true" referrerpolicy="unsafe-url"    src="' . $h . '"></iframe></div>' . "\n"; }
 
     else if ( $c )
     { $sc[ 'header' ] = '<a href="index.php?cNr=' .$sc['id'] . '">' .$sc['header']. '<p  style="position:absolute;top: 900px; width:100%; text-align:center;  font-size: xx-large ;">[weitere Infos >>]</p></a>' ;
@@ -370,6 +380,39 @@ function getScreenContent( $html, $sc )
     { $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
     }
     return $html ;
+
+    $viewerHTML = '<!DOCTYPE html>
+<html>
+<head>
+<style>
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: #000;
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+</style>
+</head>
+<body>
+
+<img src="bild.jpg">
+
+</body>
+</html>';
+
 
 }
 
@@ -651,12 +694,12 @@ $html['editorhead'] = <<<EOD
   .ssline2 {  border: solid 2px black; margin: 10px; padding: 10px; }
   .ssheader_, .sscontent {float:left;width:600px; border: solid 2px gray;}
   .ssspinner, .ssheader_, .sscontent {  height:400px;   background-size: cover; margin-right:  0px; margin-left: 10px; }
-  .ssspinner { width:40px; margin-right: 0px;}
+  .ssspinner { width:40px; margin-right: 0;}
   .sscontent { overflow: auto;}
   .ssdate { font-size: 18px; height: 50px; }
   .ssdel  {  padding: 15px; margin:10px; margin-left:0px;  position: relative;  }
   .ssnew  {  padding: 15px; margin:10px; }
-  .ssactive  {height: 40px; position: relative; margin:10px  ; margin-left:0px;width: 40px;}
+  .ssactive  {height: 40px; position: relative; margin:10px  ; margin-left:0;width: 40px;}
 </style>
 
 <style>

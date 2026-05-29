@@ -9,6 +9,8 @@ include ( 'inc/data.php' ) ;
 $cNr = 0;
 if( isset( $_GET[ 'cNr' ] ) ) $cNr = $_GET[ 'cNr' ];
 
+
+
 $db     =  new SQLite3('../db/hallmonitor.db' );
 $today  =  strtotime ( date("Y-m-d" ) );
 $screen =  getScreenData( $db );

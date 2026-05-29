@@ -72,14 +72,37 @@ EOD;
 
 function getScreenData( $db )
 { $screen = null;
-  $stmt   = $db -> prepare( 'SELECT * FROM slidescreen' );
+#deb()
+  $stmt   = $db -> prepare( 'SELECT * FROM slidescreen  WHERE start_on < DATE("now") AND best_before > DATE("now")  AND best_before !=  date("1900-01-01")  ORDER BY start_on ASC, active DESC' );
   $res    = $stmt -> execute();
   
   while ( $row = $res -> fetchArray() )
   {  $screen[ $row[ 'id' ] ]  = $row;
   }
 
-  return $screen;
+  $anzSichtbareScreens = sizeof($screen );
+
+  $stmt   = $db -> prepare( 'SELECT * FROM slidescreen  WHERE ( start_on > DATE("now") OR best_before < DATE("now") )  AND best_before !=  date("1900-01-01")  ORDER BY start_on ASC, active DESC ' );
+  $res    = $stmt -> execute();
+
+  while ( $row = $res -> fetchArray() )
+  {  $screen[ $row[ 'id' ] ]  = $row;
+  }
+
+
+  $stmt   = $db -> prepare( 'SELECT * FROM slidescreen  WHERE   best_before =  date("1900-01-01") ORDER BY start_on ASC, active DESC ' );
+  $res    = $stmt -> execute();
+
+  while ( $row = $res -> fetchArray() )
+  {  $screen[ $row[ 'id' ] ]  = $row;
+  }
+
+
+
+
+
+
+    return $screen;
 }
 
 function getHtmlData( $db )
@@ -287,47 +310,83 @@ function getScreenSlideEditor($db)
 
 function getScreenslideData( $html, $screen, $today, $screenslide )
 { $html[ 'screenslide' ] =  $screenslide;
-  if ( isset( $html[ 'screenslide' ] ) )
-    foreach ( $screen as $sc )
-    { if   ( $today >= ( strtotime( $sc[ 'start_on' ] ) ) AND  ( $today <= strtotime( $sc[ 'best_before' ] ) ) )
-      {     $intime = 'true';  }
-      else {$intime = 'false'; }
+    $html[ 'hasContent' ]  = false;
+    if ( isset( $html[ 'screenslide' ] ) )
+    {
+     foreach ( $screen as $sc )
+     {
+       if   ( $today >= ( strtotime( $sc[ 'start_on' ] ) ) AND  ( $today <= strtotime( $sc[ 'best_before' ] ) ) )
+       {     $intime = 'true';  }
+       else {$intime = 'false'; }
      
-      if ( $sc[ 'active' ] == 'true' AND $intime   ==  'true' )
-      {  $c =  strip_tags(  $sc['content'] );
-         $h = (filter_var( strip_tags(  $sc['header'])   , FILTER_VALIDATE_URL) );
-
-         if ($h)
-         { $html['screenslide'] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse" style="padding-top: 0px;"><iframe width="1920" height="1100"  allowfullscreen = "true" referrerpolicy="unsafe-url"    src="' . $h . '"></iframe></div>' . "\n"; }
-  
-         else if ( $c )
-         { $sc[ 'header' ] = '<a href="index.php?cNr=' .$sc['id'] . '">' .$sc['header']. '<p  style="position:absolute;top: 900px; width:100%; text-align:center;  font-size: xx-large ;">[weitere Infos >>]</p></a>' ;
-           $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
-        }
-  
-        else
-        { $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
-        }
+       if ( $sc[ 'active' ] == 'true' AND $intime   ==  'true' )
+       {  $html[ 'hasContent' ]  = true;
+         $html = getScreenContent( $html, $sc );
        }
-    }
+     }
+
+     if(  !$html[ 'hasContent' ]  )   ## -- Kein aktueller Content. Dann nimm die Standby-Sheets, diese sind definiert durch: $sc[ 'best_before' ] == '1900-01-01' )
+     {
+       foreach ( $screen as $sc )
+       {
+         if   (  $sc[ 'best_before' ] == '1900-01-01' )
+         {
+             $sc[ 'best_before' ] =  date('Y-m-d', $today  );
+             $sc[ 'start_on'    ] =  date('Y-m-d', $today );
+             $html = getScreenContent( $html, $sc );
+         }
+       }
+     }
+   }
+
+
+
+
+
+
+
+
   $html['screenslide'] .= '</div>';
   return $html['screenslide'] ;
 }
 
 
+function getScreenContent( $html, $sc )
+{
+    $html[ 'hasContent' ] = true;
+
+    $c =  strip_tags(  $sc['content'] );
+    $h = (filter_var( strip_tags(  $sc['header'])   , FILTER_VALIDATE_URL) );
+
+    if ($h)
+    { $html['screenslide'] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse" style="padding-top: 0px;"><iframe width="1920" height="1100"  allowfullscreen = "true" referrerpolicy="unsafe-url"    src="' . $h . '"></iframe></div>' . "\n"; }
+
+    else if ( $c )
+    { $sc[ 'header' ] = '<a href="index.php?cNr=' .$sc['id'] . '">' .$sc['header']. '<p  style="position:absolute;top: 900px; width:100%; text-align:center;  font-size: xx-large ;">[weitere Infos >>]</p></a>' ;
+        $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
+    }
+
+    else
+    { $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
+    }
+    return $html ;
+
+}
+
+
 function getScreenSlideRow($ss)
 {
-$html  =  "\n" . '<div                           class = "ssline" id="sslineX' .$ss[ 'id' ]. '"  > ';
-$html .=  "\n" . '<div                           class = "ssline2" > <div   name ="ssheader_'  .$ss[ 'id' ]. '"  id = "ssheader__'  .$ss[ 'id' ]. '" class = "ssheader_" >'        .$ss[ 'header'  ]. '</div></div> ';
-$html .=  "\n" . '<div                           class = "ssline2" > <input name ="ssspinner'  .$ss[ 'id' ]. '"  id = "ssspinner_'  .$ss[ 'id' ]. '" class = "ssspinner" value="'  .$ss[ 'img'     ]. '"></div>          ';
-$html .=  "\n" . '<div                           class = "ssline2" > <div   name ="sscontent'  .$ss[ 'id' ]. '"  id = "sscontent_'  .$ss[ 'id' ]. '" class = "sscontent" >'        .$ss[ 'content' ]. '</div></div><div> ';
+if( $ss[ 'active' ] == "true" ) { $chk = 'checked';  } else { $chk = ''; }
+$html  =  "\n" . '<div                     class = "ssline" id="sslineX' .$ss[ 'id' ]. '"  > ';
+$html .=  "\n" . '<div                     class = "ssline2"  > <div   name ="ssheader_'  .$ss[ 'id' ]. '"  id = "ssheader__'  .$ss[ 'id' ]. '"  class = "ssheader_" >'        .$ss[ 'header'  ]. '</div></div> ';
+$html .=  "\n" . '<div                     class = "ssline2"  > <input name ="ssspinner'  .$ss[ 'id' ]. '"  id = "ssspinner_'  .$ss[ 'id' ]. '"  style="width: 60px;"  class = "ssspinner" value="'  .$ss[ 'img'     ]. '"></div>          ';
 
-$html .=  "\n" . '<div                      class = "ssline2"   id = "ssblockC'    .$ss[ 'id' ]. '">';
+
+
+$html .=  "\n" . '<div                     class = "ssline2"   id = "ssblockC'    .$ss[ 'id' ]. '">';
 $html .=  "\n" . ' <input type = "date"     class = "ssdate"    name ="sssdate"  id = "sssdate'   .$ss[ 'id' ]. '" value="'         .$ss[ 'start_on'    ]. '" ><br>';
 $html .=  "\n" . ' <input type = "date"     class = "ssdate"    name ="ssedate"  id = "ssedate'   .$ss[ 'id' ]. '" value="'         .$ss[ 'best_before' ]. '" ><br>';
-if( $ss[ 'active'] == "true" ) { $chk = 'checked';  } else { $chk = ''; }
 $html .=  "\n" . ' <input type = "checkbox" class = "ssactive"  name ="ssactive" id = "ssactive'  .$ss[ 'id' ]. '" value="active" ' .$chk. ' ><br>';
-
 $html .=  "\n" . '<div id="drag-and-drop-zone' .$ss[ 'id' ]. '" class="dm-uploader">';
 $html .=  "\n" . '<h3 class="mb-51 text-muted">PDF<br/>JGP<br/>PNG</h3> ';
 $html .=  "\n" . '<div class="btn btn-primary btn-block mb-5"> ';
@@ -336,11 +395,16 @@ $html .=  "\n" . '<input type="file"  title="Click to add Files" /> ';
 $html .=  "\n" . '<input type="hidden" id="x'.$ss[ 'id' ].'" name="ssid" value="'.$ss[ 'id' ].'" /> ';
 $html .=  "\n" . '</div></div> ';
 $html .=  "\n" . ' ';
-
 $html .=  "\n" . '<input type = "button"    class = "ssdel"     name ="action"   id = "ssdel'     .$ss[ 'id' ]. '" value=" DEL " >';
 $html .=  "\n" . '</div>';
+
+if( !empty( strip_tags( $ss[ 'content' ]))  )
+    $html .=  "\n" . '<div                     class = "ssline2"  > <div   name ="sscontent'  .$ss[ 'id' ]. '"  id = "sscontent_'  .$ss[ 'id' ]. '"  class = "sscontent" >'        .$ss[ 'content' ]. '</div></div>';
+
+    $html .=  "\n" . '</div>';
 $html .=  "\n" . '</div>';
-$html .=  "\n" . '</div>';
+
+
 
 $html .=  "\n".'<script>';
 

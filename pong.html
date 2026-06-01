@@ -35,9 +35,9 @@
 			var rect2 = {x: oObject.x - oObject.width/2, y:oObject.y- oObject.height/2, width: oObject.width, height: oObject.height};
 			var dx, dy, r1 = {}, r2 = {};
 			r1.cx = rect1.x + (r1.hw = (rect1.width / 2));
-			r1.cy = rect1.y + (r1.hh = (rect1.height / 4));
+			r1.cy = rect1.y + (r1.hh = (rect1.height / 2));
 			r2.cx = rect2.x + (r2.hw = (rect2.width / 2));
-			r2.cy = rect2.y + (r2.hh = (rect2.height / 4));
+			r2.cy = rect2.y + (r2.hh = (rect2.height / 2));
 
 			dx = Math.abs(r1.cx - r2.cx) - (r1.hw + r2.hw);
 			dy = Math.abs(r1.cy - r2.cy) - (r1.hh + r2.hh);
@@ -63,7 +63,7 @@
 					ballSpeedX : -5,
 					ballSpeedY : -3,
 					ballRadius : 5,
-					paddleHeight : 40,
+					paddleHeight : 25,
 					constructor : function() {
 						//initialize createjs objects
 						this.stage = new createjs.Stage(document.getElementById("stage"));

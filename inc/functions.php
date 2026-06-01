@@ -71,7 +71,7 @@ EOD;
 }
 
 function getScreenData( $db )
-{ $screen = null;
+{ $screen = array();
 #deb()
   $stmt   = $db -> prepare( 'SELECT * FROM slidescreen  WHERE start_on < DATE("now") AND best_before > DATE("now")  AND best_before !=  date("1900-01-01")  ORDER BY start_on ASC, active DESC' );
   $res    = $stmt -> execute();
@@ -120,7 +120,9 @@ function getHtmlData( $db )
 
 function actionHandler( $db )
 { $post = $_POST;
-  
+
+
+
   if( isset( $post[ 'action' ] ) )
   { if ( $post[ 'action' ] == ' NEW ')
     $ss [ 'best_before' ] =  $datepreset =  date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d") + 7 , date("Y")));
@@ -353,35 +355,35 @@ function getScreenslideData( $html, $screen, $today, $screenslide )
 
 function getScreenContent( $html, $sc )
 {
-
-    $url = (isset($_SERVER['HTTPS']) ? 'https' : 'http')
+   $url = (isset($_SERVER['HTTPS']) ? 'https' : 'http')
         . '://'
         . $_SERVER['HTTP_HOST']
         . $_SERVER['REQUEST_URI'];
 
     $html[ 'hasContent' ] = true;
 
-    $c =  strip_tags(  $sc['content'] );
-    if(!empty($c)){
-        $sc['header'] =   dirname($url) . '/backend/files/'.$c;;
-    }
+  $c =  strip_tags(  $sc['content'] );
+  if(!empty($c))
+  { $c = pathinfo( $c , PATHINFO_FILENAME).".html";
+    $sc['header'] =   dirname($url) . '/backend/files/'.$c;;
+  }
 
-    $h = (filter_var( strip_tags(  $sc['header'])   , FILTER_VALIDATE_URL) );
+  $h = (filter_var( strip_tags(  $sc['header'])   , FILTER_VALIDATE_URL) );
 
-    if ($h)
-    { $html['screenslide'] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse" style="padding-top: 0px;"><iframe style="display: block;   margin: auto;" width="1920" height="1100"  allowfullscreen = "true" referrerpolicy="unsafe-url"    src="' . $h . '"></iframe></div>' . "\n"; }
+  if ($h)
+  { $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc[ 'img' ] . '.jpg" class="any inverse" style="padding-top: 0px;"><iframe style="display: block;   margin: auto;" width="1920" height="1100"  allowfullscreen = "true" referrerpolicy="unsafe-url"    src="' . $h . '"></iframe></div>' . "\n"; }
 
-    else if ( $c )
-    { $sc[ 'header' ] = '<a href="index.php?cNr=' .$sc['id'] . '">' .$sc['header']. '<p  style="position:absolute;top: 900px; width:100%; text-align:center;  font-size: xx-large ;">[weitere Infos >>]</p></a>' ;
-        $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
-    }
+  else if ( $c )
+  { $sc[ 'header' ] = '<a href="index.php?cNr=' .$sc['id'] . '">' .$sc['header']. '<p  style="position:absolute;top: 900px; width:100%; text-align:center;  font-size: xx-large ;">[weitere Infos >>]</p></a>' ;
+    $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
+  }
 
-    else
-    { $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
-    }
-    return $html ;
+  else
+  { $html[ 'screenslide' ] .= '<div data-img="i/jpg/full/' . $sc['img'] . '.jpg" class="any inverse"><div class="mobg"><div class="mo">' . $sc['header'] . '</div></div></div>'."\n";
+  }
+  return $html ;
 
-    $viewerHTML = '<!DOCTYPE html>
+  $viewerHTML = '<!DOCTYPE html>
 <html>
 <head>
 <style>
@@ -603,14 +605,10 @@ EOD;
     <span>Toggle</span>
   </button>
   <ul class="c-circle-menu__items">
-    <li class="c-circle-menu__item" id="myButton1" >
-      <div onclick="window.location='klausshowW22.php'" class="c-circle-menu__link">
-        <img src="img/search.svg" alt="">
-      </div>
-    </li>
+ 
 
   <li class="c-circle-menu__item" id="myButton2" >
-          <div onclick="window.location='klausshowS23.php'" class="c-circle-menu__link">
+          <div onclick="window.location='HAW-Hamburg_Imp_Datenschutz.html'" class="c-circle-menu__link">
         <img src="img/search.svg" alt="">
       </a>
     </li>
@@ -649,7 +647,7 @@ tippy('#myButton1', { allowHTML: true,   maxWidth: 'none',   placement: 'left', 
 content: '<div class="tooltip">Klausurnoten WS22</div>',
   });
  tippy('#myButton2', { allowHTML: true,   maxWidth: 'none',   placement: 'left', offset: [0, 0],
-	content: '<div  class="tooltip">Klausurnoten SS23</div>',
+	content: '<div  class="tooltip">Impressum und Datenschutz</div>',
   })
   tippy('#myButton3', { allowHTML: true,  maxWidth: 'none',    placement: 'left', offset: [0, 0],
 	content: '<div  class="tooltip">Raumfinder</div>',

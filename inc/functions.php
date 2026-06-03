@@ -433,7 +433,7 @@ $html .=  "\n" . ' <input type = "date"     class = "ssdate"    name ="sssdate" 
 $html .=  "\n" . ' <input type = "date"     class = "ssdate"    name ="ssedate"  id = "ssedate'   .$ss[ 'id' ]. '" value="'         .$ss[ 'best_before' ]. '" ><br>';
 $html .=  "\n" . ' <input type = "checkbox" class = "ssactive"  name ="ssactive" id = "ssactive'  .$ss[ 'id' ]. '" value="active" ' .$chk. ' ><br>';
 $html .=  "\n" . '<div id="drag-and-drop-zone' .$ss[ 'id' ]. '" class="dm-uploader">';
-$html .=  "\n" . '<h3 class="mb-51 text-muted">PDF<br/>JGP<br/>PNG</h3> ';
+$html .=  "\n" . '<h3 class="mb-51 text-muted">JGP<br/>PNG</h3> ';
 $html .=  "\n" . '<div class="btn btn-primary btn-block mb-5"> ';
 $html .=  "\n" . '<span>open</span> ';
 $html .=  "\n" . '<input type="file"  title="Click to add Files" /> ';
